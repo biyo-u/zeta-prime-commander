@@ -4,13 +4,13 @@ import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
-public class IntakeOnCommand extends CommandBase {
+public class OuttakeOnCommand extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final IntakeSubsystem intakeSubsystem;
 
 
-    public IntakeOnCommand(IntakeSubsystem subsystem) {
+    public OuttakeOnCommand(IntakeSubsystem subsystem) {
         intakeSubsystem = subsystem;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
@@ -18,8 +18,8 @@ public class IntakeOnCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        //turn intake on
-        intakeSubsystem.Intake();
+        //turn outtake on
+        intakeSubsystem.Outtake();
     }
 
     @Override
