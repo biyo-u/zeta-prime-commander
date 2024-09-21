@@ -2,28 +2,28 @@ package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
-import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.AscentSubsystem;
 
-public class IntakeOnCommand extends CommandBase {
+public class AscentHighRungCommand extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final IntakeSubsystem intakeSubsystem;
+    private final AscentSubsystem ascentSubsystem;
 
 
-    public IntakeOnCommand(IntakeSubsystem subsystem) {
-        intakeSubsystem = subsystem;
+    public AscentHighRungCommand(AscentSubsystem subsystem) {
+        ascentSubsystem = subsystem;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
-        //turn intake on
-        intakeSubsystem.Intake();
+        //High rung ascent
+        ascentSubsystem.ascentHighRung();
     }
 
     @Override
     public boolean isFinished() {
-        return true;
+        return ascentSubsystem.IsAscentHighRung();
     }
 }
