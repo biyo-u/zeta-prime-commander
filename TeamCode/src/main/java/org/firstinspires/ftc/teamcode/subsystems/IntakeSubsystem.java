@@ -20,6 +20,20 @@ public class IntakeSubsystem extends SubsystemBase {
     private int intakePivotUpPosition = 0;
     private int intakePivotDownPosition = 0;
 
+    private SampleColour desiredColour = SampleColour.NONE;
+
+    public enum SampleColour
+    {
+        NONE,
+        RED,
+        BLUE,
+        NEUTRAL,
+
+        RED_OR_NEUTRAL,
+
+        BLUE_OR_NEUTRAL
+    }
+
     public IntakeSubsystem(final HardwareMap hMap){
         intakeMotor = hMap.get(DcMotor.class, "intakeMotor");
         intakeSlideMotor = hMap.get(DcMotor.class, "intakeSlideMotor");
@@ -30,6 +44,10 @@ public class IntakeSubsystem extends SubsystemBase {
     public void Intake() {
         //Turns the intake on
         intakeMotor.setPower(1);
+    }
+
+    public void IntakeOff(){
+        intakeMotor.setPower(0);
     }
 
     public void Outtake() {
@@ -73,5 +91,22 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public boolean IsIntakePivotedDown() {
         return intakePivot.getPosition() < (intakePivotDownPosition + 0.3);
+    }
+
+    public SampleColour getCurrentIntakeColour(){
+        //TODO: add colour detection here.
+        //TODO: cache this for 20 - 40 ms
+        return SampleColour.NONE;
+    }
+
+    public void colourAwareIntake(){
+
+        if(getCurrentIntakeColour() == SampleColour.NONE){
+            this.Intake();
+        }else if(getCurrentIntakeColour() == desiredColour){
+            this.IntakeOff();
+        }else{
+            this.Outtake();
+        }
     }
 }
