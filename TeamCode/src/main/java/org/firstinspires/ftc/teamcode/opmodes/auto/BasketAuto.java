@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOnCommand;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 
 @Autonomous(name = "BasketAuto", group = "Autonomous")
 public class BasketAuto  extends CommandOpMode {
@@ -28,7 +29,7 @@ public class BasketAuto  extends CommandOpMode {
         intakeSubsystem = new IntakeSubsystem(hardwareMap);
 
         // instantiate your MecanumDrive at a particular pose.
-        MecanumDrive drive = new MecanumDrive(hardwareMap,
+        OTOSDrive drive = new OTOSDrive(hardwareMap,
                 new Pose2d(11.8, 61.7, Math.toRadians(90)));
 
         dropOffAction = drive.actionBuilder(drive.pose)
