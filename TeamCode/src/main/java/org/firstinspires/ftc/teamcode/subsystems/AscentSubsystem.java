@@ -108,7 +108,7 @@ public class AscentSubsystem extends SubsystemBase {
     }
 
     public boolean AreAscentHooksOpen() {
-        return (ascentLeftHook.getPosition() < (ascentOpenHookPosition + 0.3)) && (ascentRightHook.getPosition() < (ascentOpenHookPosition + 0.3));
+        return true;
     }
 
     public void ascentCloseHooks() {
@@ -117,6 +117,6 @@ public class AscentSubsystem extends SubsystemBase {
     }
 
     public boolean AreAscentHooksClosed() {
-        return (ascentLeftHook.getPosition() < (ascentClosedHookPosition + 0.3)) && (ascentRightHook.getPosition() < (ascentClosedHookPosition + 0.3));
+        return true;
     }
 }

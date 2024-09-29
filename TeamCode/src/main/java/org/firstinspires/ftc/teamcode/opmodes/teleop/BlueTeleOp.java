@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.DefaultDrive;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 
@@ -22,19 +24,31 @@ public class BlueTeleOp  extends CommandOpMode {
     @Override
     public void initialize() {
         m_drive = new DriveSubsystem(hardwareMap);
-        intakeSubsystem = new IntakeSubsystem(hardwareMap);
+       // intakeSubsystem = new IntakeSubsystem(hardwareMap);
         m_driverOp = new GamepadEx(gamepad1);
+
+        intakeSubsystem = new IntakeSubsystem(hardwareMap);
+
 
         m_driveCommand = new DefaultDrive(m_drive, () -> m_driverOp.getLeftX(),  () -> m_driverOp.getLeftY(), () -> m_driverOp.getRightX());
 
         register(m_drive);
-        m_drive.setDefaultCommand(m_driveCommand);
+        //removed joystick functionallity
+        //m_drive.setDefaultCommand(m_driveCommand);
 
         //TODO: we need to have commands that can set the desired colour
-        m_driverOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(
+       m_driverOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(
                 new ColourAwareIntakeCommand(intakeSubsystem)
         ).whenReleased(
                 new IntakeOffCommand(intakeSubsystem)
+        );
+
+        //alex yucky code please delete
+        m_driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+                new IntakeSlidesOutCommand(intakeSubsystem)
+
+        ).whenReleased(
+                new IntakeSlidesInCommand(intakeSubsystem)
         );
 
     }

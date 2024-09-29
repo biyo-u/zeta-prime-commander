@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,13 +10,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //Define motors and servos
     private DcMotor intakeMotor;
-    private DcMotor intakeSlideMotor;
 
     public Servo intakePivot;
+    public Servo intakeLeftSlide;
+    public Servo intakeRightSlide;
 
     // Define variables
-    private int intakeSlidesInPosition = 0;
-    private int intakeSlidesOutPosition = 0;
+    private double intakeSlidesInPosition = 0.5;
+    private double intakeSlidesOutPosition = 0;
 
     private int intakePivotUpPosition = 0;
     private int intakePivotDownPosition = 0;
@@ -36,9 +38,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem(final HardwareMap hMap){
         intakeMotor = hMap.get(DcMotor.class, "intakeMotor");
-        intakeSlideMotor = hMap.get(DcMotor.class, "intakeSlideMotor");
 
         intakePivot = hMap.get(Servo.class, "pivotIntake");
+        intakeLeftSlide = hMap.get(Servo.class, "intakeLeftSlide");
+        intakeRightSlide = hMap.get(Servo.class, "intakeRightSlide");
+
+        intakeRightSlide.setDirection(Servo.Direction.REVERSE);
     }
 
     public void Intake() {
@@ -57,24 +62,22 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void intakeSlidesIn() {
         //Brings the slides in
-        intakeSlideMotor.setTargetPosition(intakeSlidesInPosition);
-        intakeSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeSlideMotor.setPower(1);
+        intakeLeftSlide.setPosition(intakeSlidesInPosition);
+        intakeRightSlide.setPosition(intakeSlidesInPosition);
     }
 
     public boolean AreIntakeSlidesIn() {
-        return intakeSlideMotor.getCurrentPosition() < (intakeSlidesInPosition + 50);
+        return true;
     }
 
     public void intakeSlidesOut() {
         //Brings the slides out
-        intakeSlideMotor.setTargetPosition(intakeSlidesOutPosition);
-        intakeSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        intakeSlideMotor.setPower(1);
+        intakeLeftSlide.setPosition(intakeSlidesOutPosition);
+        intakeRightSlide.setPosition(intakeSlidesOutPosition);
     }
 
     public boolean AreIntakeSlidesOut() {
-        return intakeSlideMotor.getCurrentPosition() > (intakeSlidesInPosition - 50);
+        return true;
     }
 
     public void intakePivotUp () {
@@ -82,7 +85,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public boolean IsIntakePivotedUp() {
-        return intakePivot.getPosition() > (intakePivotUpPosition - 0.3);
+        return true;
     }
 
     public void intakePivotDown () {
@@ -90,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public boolean IsIntakePivotedDown() {
-        return intakePivot.getPosition() < (intakePivotDownPosition + 0.3);
+        return true;
     }
 
     public SampleColour getCurrentIntakeColour(){

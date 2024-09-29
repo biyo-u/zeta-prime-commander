@@ -32,6 +32,7 @@ public class OTOSDrive extends MecanumDrive {
         otos.setAngularUnit(AngleUnit.RADIANS);
 
         otos.setOffset(PARAMS.offset);
+        otos.setPosition(RRPoseToOTOSPose(pose));
 
         System.out.println(otos.calibrateImu(255, true));
         System.out.println("OTOS calibration complete!");
