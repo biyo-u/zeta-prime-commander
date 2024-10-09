@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.DefaultDrive;
+import org.firstinspires.ftc.teamcode.commands.DesiredColourBlueCommand;
+import org.firstinspires.ftc.teamcode.commands.DesiredColourNeutralCommand;
+import org.firstinspires.ftc.teamcode.commands.DesiredColourRedCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
@@ -18,39 +21,50 @@ public class BlueTeleOp  extends CommandOpMode {
 
     private DriveSubsystem m_drive;
     private DefaultDrive m_driveCommand;
-
     private IntakeSubsystem intakeSubsystem;
-    private GamepadEx m_driverOp;
+    private GamepadEx m_driveDriver;
+    private GamepadEx m_driveOperator;
     @Override
     public void initialize() {
         m_drive = new DriveSubsystem(hardwareMap);
-       // intakeSubsystem = new IntakeSubsystem(hardwareMap);
-        m_driverOp = new GamepadEx(gamepad1);
+        m_driveDriver = new GamepadEx(gamepad1);
+        m_driveOperator = new GamepadEx(gamepad2);
 
         intakeSubsystem = new IntakeSubsystem(hardwareMap);
 
-
-        m_driveCommand = new DefaultDrive(m_drive, () -> m_driverOp.getLeftX(),  () -> m_driverOp.getLeftY(), () -> m_driverOp.getRightX());
+        m_driveCommand = new DefaultDrive(m_drive, () -> m_driveDriver.getLeftX(),  () -> m_driveDriver.getLeftY(), () -> m_driveDriver.getRightX());
 
         register(m_drive);
-        //removed joystick functionallity
-        //m_drive.setDefaultCommand(m_driveCommand);
+        m_drive.setDefaultCommand(m_driveCommand);
 
         //TODO: we need to have commands that can set the desired colour
-       m_driverOp.getGamepadButton(GamepadKeys.Button.B).whenPressed(
+
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.B).whenPressed(
                 new ColourAwareIntakeCommand(intakeSubsystem)
+
         ).whenReleased(
                 new IntakeOffCommand(intakeSubsystem)
         );
 
         //alex yucky code please delete
-        m_driverOp.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.A).whenPressed(
                 new IntakeSlidesOutCommand(intakeSubsystem)
 
         ).whenReleased(
                 new IntakeSlidesInCommand(intakeSubsystem)
         );
 
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(
+                new DesiredColourBlueCommand(intakeSubsystem)
+        );
+
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.B).whenPressed(
+                new DesiredColourRedCommand(intakeSubsystem)
+        );
+
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
+                new DesiredColourNeutralCommand(intakeSubsystem)
+        );
     }
 }
 
