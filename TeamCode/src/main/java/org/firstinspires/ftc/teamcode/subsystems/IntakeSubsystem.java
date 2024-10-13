@@ -15,12 +15,12 @@ public class IntakeSubsystem extends SubsystemBase {
     //Define motors and servos
     private DcMotor intakeMotor;
 
-    public Servo intakeLeftPivot;
-    public Servo intakeRightPivot;
-    public Servo intakeLeftSlide;
-    public Servo intakeRightSlide;
+    private Servo intakeLeftPivot;
+    private Servo intakeRightPivot;
+    private Servo intakeLeftSlide;
+    private Servo intakeRightSlide;
 
-    public Servo poopChute;
+    private Servo poopChute;
 
     // Define the colour sensor
     private NormalizedColorSensor colourSensor;
@@ -30,7 +30,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private double intakeSlidesOutPosition = 0;
 
     private double intakePivotUpPosition = 0;
-    private double intakePivotDownPosition = 0;
+    private double intakePivotDownPosition = 0.5;
 
     private double intakePoopOpen = 0;
 
@@ -63,8 +63,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
         colourSensor = hMap.get(NormalizedColorSensor.class, "colourSensor");
 
-        intakeRightPivot.setDirection(Servo.Direction.REVERSE);
+        intakeLeftPivot.setDirection(Servo.Direction.REVERSE);
+
         intakeRightSlide.setDirection(Servo.Direction.REVERSE);
+
+        intakePivotUp();
+        intakeSlidesIn();
+
     }
 
     public void Intake() {
@@ -181,13 +186,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void colourAwareIntake(){
 
-        while(getCurrentIntakeColour() != desiredColour) {
             if (getCurrentIntakeColour() == SampleColour.NONE) {
                 this.Intake();
             } else if(getCurrentIntakeColour() != desiredColour){
                 this.Outtake();
+            }else {
+
+                this.IntakeOff();
             }
-        }
-        this.IntakeOff();
     }
 }

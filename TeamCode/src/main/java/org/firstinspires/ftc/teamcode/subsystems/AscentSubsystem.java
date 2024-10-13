@@ -11,8 +11,8 @@ public class AscentSubsystem extends SubsystemBase {
     private DcMotor ascentLeftMotor;
     private DcMotor ascentRightMotor;
 
-    public Servo ascentLeftHook;
-    public Servo ascentRightHook;
+    private Servo ascentLeftHook;
+    private Servo ascentRightHook;
 
     // Define variables
     private int ascentStowedPosition = 0;

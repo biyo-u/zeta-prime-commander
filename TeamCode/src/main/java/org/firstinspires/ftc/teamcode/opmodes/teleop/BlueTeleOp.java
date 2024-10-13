@@ -1,27 +1,50 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import android.transition.Slide;
+
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.DefaultDrive;
 import org.firstinspires.ftc.teamcode.commands.DesiredColourBlueCommand;
 import org.firstinspires.ftc.teamcode.commands.DesiredColourNeutralCommand;
 import org.firstinspires.ftc.teamcode.commands.DesiredColourRedCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
+import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
+import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
+import org.firstinspires.ftc.teamcode.commands.SlidesHighChamberCommand;
+import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
+import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
+import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
+
+import java.util.function.BooleanSupplier;
 
 @TeleOp(name = "Blue TeleOp")
 public class BlueTeleOp  extends CommandOpMode {
-
+// rightn trigger: basket
+    // left trigger slides out and intake
+    // right bumper speciman chamber
     private DriveSubsystem m_drive;
     private DefaultDrive m_driveCommand;
     private IntakeSubsystem intakeSubsystem;
+    private TransferSubsystem transferSubsystem;
+    private SlidesSubsystem slidesSubsystem;
     private GamepadEx m_driveDriver;
     private GamepadEx m_driveOperator;
     @Override
@@ -31,6 +54,8 @@ public class BlueTeleOp  extends CommandOpMode {
         m_driveOperator = new GamepadEx(gamepad2);
 
         intakeSubsystem = new IntakeSubsystem(hardwareMap);
+        transferSubsystem = new TransferSubsystem(hardwareMap);
+        slidesSubsystem = new SlidesSubsystem(hardwareMap);
 
         m_driveCommand = new DefaultDrive(m_drive, () -> m_driveDriver.getLeftX(),  () -> m_driveDriver.getLeftY(), () -> m_driveDriver.getRightX());
 
@@ -39,19 +64,78 @@ public class BlueTeleOp  extends CommandOpMode {
 
         //TODO: we need to have commands that can set the desired colour
 
-        m_driveDriver.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new ColourAwareIntakeCommand(intakeSubsystem)
+        //Intake
+        new Trigger(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                return m_driveDriver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5;
+            }
+        }).whenActive(
+                new SequentialCommandGroup(
+                    new ParallelCommandGroup(
+                        new ColourAwareIntakeCommand(intakeSubsystem),
+                        new IntakeSlidesOutCommand(intakeSubsystem)
+                    ),
+                    new IntakePivotDownCommand(intakeSubsystem)
+                )
+        ).whenInactive(
+                new SequentialCommandGroup(
+                    new IntakeOffCommand(intakeSubsystem),
+                    new IntakePivotUpCommand(intakeSubsystem),
+                    new IntakeSlidesInCommand(intakeSubsystem),
+                    new CloseGripplerCommand(transferSubsystem)
+                )
+        );
 
-        ).whenReleased(
-                new IntakeOffCommand(intakeSubsystem)
+        //High basket sample
+        new Trigger(new BooleanSupplier() {
+            @Override
+            public boolean getAsBoolean() {
+                return m_driveDriver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5;
+            }
+        }).whenActive(
+            new ParallelCommandGroup(
+                new SlidesHighBasketCommand(slidesSubsystem),
+                new TransferFlipCommand(transferSubsystem)
+            )).whenInactive(
+                new SequentialCommandGroup(
+                    new OpenGripplerCommand(transferSubsystem),
+                    new TransferStowCommand(transferSubsystem),
+                    new SlidesStowCommand(slidesSubsystem)
+                )
+        );
+
+        //High chamber specimen
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new ParallelCommandGroup(
+                        new SlidesHighChamberCommand(slidesSubsystem),
+                        new TransferFlipCommand(transferSubsystem)
+                )).whenInactive(
+                new SequentialCommandGroup(
+                        new OpenGripplerCommand(transferSubsystem),
+                        new TransferStowCommand(transferSubsystem),
+                        new SlidesStowCommand(slidesSubsystem)
+                )
         );
 
         //alex yucky code please delete
-        m_driveDriver.getGamepadButton(GamepadKeys.Button.A).whenPressed(
-                new IntakeSlidesOutCommand(intakeSubsystem)
+        /*m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+              new SequentialCommandGroup(
+                new IntakeSlidesOutCommand(intakeSubsystem),
+                new WaitCommand(300),
+                new IntakePivotDownCommand(intakeSubsystem)
+              )
 
-        ).whenReleased(
-                new IntakeSlidesInCommand(intakeSubsystem)
+        );*/
+
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+              new SequentialCommandGroup(
+                      new IntakePivotUpCommand(intakeSubsystem),
+                      new WaitCommand(500),
+                      new IntakeSlidesInCommand(intakeSubsystem)
+
+              )
+
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(
