@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 import android.transition.Slide;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -20,9 +21,11 @@ import org.firstinspires.ftc.teamcode.commands.DesiredColourRedCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakePoopChuteCloseCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
+import org.firstinspires.ftc.teamcode.commands.OuttakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighChamberCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
@@ -72,19 +75,31 @@ public class BlueTeleOp  extends CommandOpMode {
             }
         }).whenActive(
                 new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                        new ColourAwareIntakeCommand(intakeSubsystem),
-                        new IntakeSlidesOutCommand(intakeSubsystem)
-                    ),
+                    new OpenGripplerCommand(transferSubsystem),
+                    new ColourAwareIntakeCommand(intakeSubsystem),
+                    new IntakePoopChuteCloseCommand(intakeSubsystem),
+                    new IntakeSlidesOutCommand(intakeSubsystem),
                     new IntakePivotDownCommand(intakeSubsystem)
                 )
         ).whenInactive(
-                new SequentialCommandGroup(
-                    new IntakeOffCommand(intakeSubsystem),
-                    new IntakePivotUpCommand(intakeSubsystem),
-                    new IntakeSlidesInCommand(intakeSubsystem),
-                    new CloseGripplerCommand(transferSubsystem)
+            new SequentialCommandGroup(
+                new IntakeOffCommand(intakeSubsystem),
+                new IntakePoopChuteCloseCommand(intakeSubsystem),
+                new IntakePivotUpCommand(intakeSubsystem),
+                new WaitCommand(300),
+                new IntakeSlidesInCommand(intakeSubsystem),
+                new ConditionalCommand(
+                    new WaitCommand(1),
+                    new ParallelCommandGroup(
+                        new WaitCommand(800),
+                        new CloseGripplerCommand(transferSubsystem),
+                        new IntakePivotDownCommand(intakeSubsystem)
+                    ),
+                    () ->{
+                        return intakeSubsystem.getCurrentIntakeColour() == IntakeSubsystem.SampleColour.NONE;
+                    }
                 )
+            )
         );
 
         //High basket sample
@@ -94,27 +109,45 @@ public class BlueTeleOp  extends CommandOpMode {
                 return m_driveDriver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5;
             }
         }).whenActive(
-            new ParallelCommandGroup(
-                new SlidesHighBasketCommand(slidesSubsystem),
-                new TransferFlipCommand(transferSubsystem)
+            new ConditionalCommand(
+                new WaitCommand(1),
+                new ParallelCommandGroup(
+                    new SlidesHighBasketCommand(slidesSubsystem),
+                    new TransferFlipCommand(transferSubsystem)
+                ),
+                () ->{
+                    return intakeSubsystem.getCurrentIntakeColour() == IntakeSubsystem.SampleColour.NONE;
+                }
             )).whenInactive(
                 new SequentialCommandGroup(
                     new OpenGripplerCommand(transferSubsystem),
-                    new TransferStowCommand(transferSubsystem),
-                    new SlidesStowCommand(slidesSubsystem)
+                    new ParallelCommandGroup(
+                        new TransferStowCommand(transferSubsystem),
+                        new SlidesStowCommand(slidesSubsystem)
+                    ),
+                new IntakePivotUpCommand(intakeSubsystem)
                 )
         );
 
         //High chamber specimen
         m_driveDriver.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new ParallelCommandGroup(
-                        new SlidesHighChamberCommand(slidesSubsystem),
-                        new TransferFlipCommand(transferSubsystem)
+                new ConditionalCommand(
+                        new WaitCommand(1),
+                        new ParallelCommandGroup(
+                                new SlidesHighChamberCommand(slidesSubsystem),
+                                new TransferFlipCommand(transferSubsystem)
+                        ),
+                        () ->{
+                            return intakeSubsystem.getCurrentIntakeColour() == IntakeSubsystem.SampleColour.NONE;
+                        }
                 )).whenInactive(
                 new SequentialCommandGroup(
                         new OpenGripplerCommand(transferSubsystem),
-                        new TransferStowCommand(transferSubsystem),
-                        new SlidesStowCommand(slidesSubsystem)
+                        new ParallelCommandGroup(
+                                new TransferStowCommand(transferSubsystem),
+                                new SlidesStowCommand(slidesSubsystem)
+                        ),
+                        new IntakePivotUpCommand(intakeSubsystem)
                 )
         );
 
@@ -133,9 +166,13 @@ public class BlueTeleOp  extends CommandOpMode {
                       new IntakePivotUpCommand(intakeSubsystem),
                       new WaitCommand(500),
                       new IntakeSlidesInCommand(intakeSubsystem)
-
               )
+        );
 
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.B).whenPressed(
+                new OuttakeOnCommand(intakeSubsystem)
+        ).whenReleased(
+                new IntakeOffCommand(intakeSubsystem)
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(

@@ -13,13 +13,14 @@ public class TransferSubsystem extends SubsystemBase {
     private Servo griggleWristServo;
 
     // Define variables
+    private double backwardsTransferPosition = 0;
     private double stowedTransferPosition = 0;
-    private double flippedPosition = 0;
+    private double flippedPosition = 1;
     private double middleGripplerRotation = 0;
     private double leftGripplerRotation = 0;
     private double rightGripplerRotation = 0;
     private double closedGripplerPosition = 0;
-    private double openGripplerPosition = 0;
+    private double openGripplerPosition = 0.3;
 
     public TransferSubsystem(final HardwareMap hMap) {
         armServo = hMap.get(Servo.class, "arm");
