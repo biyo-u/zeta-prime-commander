@@ -8,27 +8,44 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class TransferSubsystem extends SubsystemBase {
 
     //Define motors and servos
-    private Servo armServo;
+    private Servo armLeftServo;
+    private Servo armRightServo;
     private Servo gripplerServo;
     private Servo griggleWristServo;
 
     // Define variables
+    private double backwardsTransferPosition = 0;
     private double stowedTransferPosition = 0;
-    private double flippedPosition = 0;
+    private double flippedPosition = 1;
     private double middleGripplerRotation = 0;
     private double leftGripplerRotation = 0;
     private double rightGripplerRotation = 0;
     private double closedGripplerPosition = 0;
-    private double openGripplerPosition = 0;
+    private double openGripplerPosition = 0.3;
 
     public TransferSubsystem(final HardwareMap hMap) {
-        armServo = hMap.get(Servo.class, "arm");
+        armLeftServo = hMap.get(Servo.class, "armLeft");
+        armRightServo = hMap.get(Servo.class, "armRight");
         gripplerServo = hMap.get(Servo.class, "grippler");
         griggleWristServo = hMap.get(Servo.class, "griggleWrist");
+
+        armRightServo.setDirection(Servo.Direction.REVERSE);
+
+        stowTransfer();
+        griggleWristServo.setPosition(0.5);
+        closeGrippler();
     }
 
+    public void backwardsTransfer() {
+        armLeftServo.setPosition(backwardsTransferPosition);
+        armRightServo.setPosition(backwardsTransferPosition);
+    }
+
+    public boolean IsTransferBackwards() {return true;}
+
     public void stowTransfer() {
-        armServo.setPosition(stowedTransferPosition);
+        armLeftServo.setPosition(stowedTransferPosition);
+        armRightServo.setPosition(stowedTransferPosition);
     }
 
     public boolean IsTransferStowed() {
@@ -36,7 +53,8 @@ public class TransferSubsystem extends SubsystemBase {
     }
 
     public void flipTransfer() {
-        armServo.setPosition(flippedPosition);
+        armLeftServo.setPosition(flippedPosition);
+        armRightServo.setPosition(flippedPosition);
     }
 
     public boolean IsTransferFlipped() {

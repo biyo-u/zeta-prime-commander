@@ -23,9 +23,11 @@ import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
+import org.firstinspires.ftc.teamcode.commands.PoopChuteCloseCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighChamberCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
+import org.firstinspires.ftc.teamcode.commands.TeleOpIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
@@ -72,18 +74,22 @@ public class BlueTeleOp  extends CommandOpMode {
             }
         }).whenActive(
                 new SequentialCommandGroup(
-                    new ParallelCommandGroup(
-                        new ColourAwareIntakeCommand(intakeSubsystem),
-                        new IntakeSlidesOutCommand(intakeSubsystem)
-                    ),
-                    new IntakePivotDownCommand(intakeSubsystem)
+                    new OpenGripplerCommand(transferSubsystem),
+                    new WaitCommand(250),
+                    new TeleOpIntakeCommand(intakeSubsystem)
+
                 )
+
         ).whenInactive(
                 new SequentialCommandGroup(
                     new IntakeOffCommand(intakeSubsystem),
+                    new PoopChuteCloseCommand(intakeSubsystem),
                     new IntakePivotUpCommand(intakeSubsystem),
+                    new WaitCommand(300), //give the servos time to operate
                     new IntakeSlidesInCommand(intakeSubsystem),
-                    new CloseGripplerCommand(transferSubsystem)
+                    new WaitCommand(800), //TODO, wait for now, but we'll look to use a sensor
+                    new CloseGripplerCommand(transferSubsystem),
+                        new IntakePivotDownCommand(intakeSubsystem)
                 )
         );
 
@@ -94,14 +100,22 @@ public class BlueTeleOp  extends CommandOpMode {
                 return m_driveDriver.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5;
             }
         }).whenActive(
-            new ParallelCommandGroup(
-                new SlidesHighBasketCommand(slidesSubsystem),
-                new TransferFlipCommand(transferSubsystem)
-            )).whenInactive(
+
+            //new ParallelCommandGroup(
+               //
+                new SequentialCommandGroup(
+                        new CloseGripplerCommand(transferSubsystem),
+                        new WaitCommand(200),
+                       // new SlidesHighBasketCommand(slidesSubsystem),
+                        new TransferFlipCommand(transferSubsystem)
+                )
+            ).whenInactive(
                 new SequentialCommandGroup(
                     new OpenGripplerCommand(transferSubsystem),
                     new TransferStowCommand(transferSubsystem),
-                    new SlidesStowCommand(slidesSubsystem)
+                    new SlidesStowCommand(slidesSubsystem),
+                        new WaitCommand(900),
+                        new IntakePivotUpCommand(intakeSubsystem)
                 )
         );
 
@@ -119,7 +133,7 @@ public class BlueTeleOp  extends CommandOpMode {
         );
 
         //alex yucky code please delete
-        /*m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+       /* m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
               new SequentialCommandGroup(
                 new IntakeSlidesOutCommand(intakeSubsystem),
                 new WaitCommand(300),
@@ -128,7 +142,7 @@ public class BlueTeleOp  extends CommandOpMode {
 
         );*/
 
-        m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+        /*m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
               new SequentialCommandGroup(
                       new IntakePivotUpCommand(intakeSubsystem),
                       new WaitCommand(500),
@@ -136,7 +150,7 @@ public class BlueTeleOp  extends CommandOpMode {
 
               )
 
-        );
+        );*/
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(
                 new DesiredColourBlueCommand(intakeSubsystem)

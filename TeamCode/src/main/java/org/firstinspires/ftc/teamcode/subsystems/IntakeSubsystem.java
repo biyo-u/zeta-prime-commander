@@ -32,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private double intakePivotUpPosition = 0;
     private double intakePivotDownPosition = 0.5;
 
-    private double intakePoopOpen = 0;
+    private double intakePoopOpen = 0.5;
 
     private double intakePoopClose = 0;
 
@@ -69,6 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         intakePivotUp();
         intakeSlidesIn();
+        poopChuteClose();
 
     }
 

@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -45,12 +46,16 @@ public class ArmTest extends LinearOpMode {
     // Declare OpMode members.
 
     private DcMotor arm = null;
+    private DcMotor slide = null;
 
 
     @Override
     public void runOpMode() {
-        arm  = hardwareMap.get(DcMotor.class, "arm");
-        arm.setDirection(DcMotor.Direction.REVERSE);
+       // arm  = hardwareMap.get(DcMotor.class, "arm");
+        slide = hardwareMap.get(DcMotor.class,"verticalSlidesMotor");
+        slide.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        //arm.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -60,8 +65,10 @@ public class ArmTest extends LinearOpMode {
         while (opModeIsActive()) {
 
            if(gamepad1.a){
-               arm.setPower(1);
+             //  arm.setPower(1);
            }
+           telemetry.addData("Slides", slide.getCurrentPosition());
+           telemetry.update();
         }
     }
 }

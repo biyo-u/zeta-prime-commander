@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -12,13 +13,15 @@ public class SlidesSubsystem extends SubsystemBase {
 
     // Define variables
     private int stowedSlidesPosition = 0;
+    private int backwardsTransferPosition = 0;
     private int lowChamberPosition = 0;
     private int highChamberPosition = 0;
     private int lowBasketPosition = 0;
-    private int highBasketPosition = 0;
+    private int highBasketPosition = 645;
 
     public SlidesSubsystem(final HardwareMap hMap) {
         verticalSlideMotor = hMap.get(DcMotor.class, "verticalSlidesMotor");
+        verticalSlideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void stowSlides() {
@@ -29,6 +32,16 @@ public class SlidesSubsystem extends SubsystemBase {
 
     public boolean AreSlidesStowed() {
         return verticalSlideMotor.getCurrentPosition() < (stowedSlidesPosition + 50);
+    }
+
+    public void backwardsTransfer() {
+        verticalSlideMotor.setTargetPosition(backwardsTransferPosition);
+        verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        verticalSlideMotor.setPower(1);
+    }
+
+    public boolean AreSlidesAllowingBackwardsTransfer() {
+        return verticalSlideMotor.getCurrentPosition() > (backwardsTransferPosition - 50);
     }
 
     public void lowChamber() {
