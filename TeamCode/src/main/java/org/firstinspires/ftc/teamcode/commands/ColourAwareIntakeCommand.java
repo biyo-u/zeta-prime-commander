@@ -3,11 +3,13 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 
 public class ColourAwareIntakeCommand extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final IntakeSubsystem intakeSubsystem;
+
 
 
     public ColourAwareIntakeCommand(IntakeSubsystem subsystem) {
@@ -25,10 +27,25 @@ public class ColourAwareIntakeCommand extends CommandBase {
     public void execute(){
         //start the colour aware intaking
         intakeSubsystem.colourAwareIntake();
+        if(intakeSubsystem.IsPooping()){
+            if(intakeSubsystem.getCurrentIntakeColour() != IntakeSubsystem.SampleColour.NONE && intakeSubsystem.getDesiredIntakeColour() != intakeSubsystem.getCurrentIntakeColour()){
+                //poop out
+
+                intakeSubsystem.intakePivotUp();
+                intakeSubsystem.poopChuteClose();
+                try{
+                    Thread.sleep(30);
+                }catch(Exception err){}
+                intakeSubsystem.intakePivotDown();
+
+
+            }
+        }
     }
 
     @Override
     public boolean isFinished() {
-        return true;
+        return intakeSubsystem.getCurrentIntakeColour() == intakeSubsystem.getDesiredIntakeColour();
+
     }
 }

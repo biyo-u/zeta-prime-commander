@@ -26,7 +26,7 @@ public class BasketAuto  extends CommandOpMode {
     @Override
     public void initialize() {
 
-        intakeSubsystem = new IntakeSubsystem(hardwareMap);
+        intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
 
         // instantiate your MecanumDrive at a particular pose.
         OTOSDrive drive = new OTOSDrive(hardwareMap,

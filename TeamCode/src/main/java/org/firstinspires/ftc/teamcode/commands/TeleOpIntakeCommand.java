@@ -17,11 +17,13 @@ public class TeleOpIntakeCommand extends SequentialCommandGroup {
 
         addCommands(
 
-                new ColourAwareIntakeCommand(intakeSubsystem),
+                new IntakePivotUpCommand(intakeSubsystem),
                 new IntakeSlidesOutCommand(intakeSubsystem),
                 new WaitCommand(300),
                 new PoopChuteOpenCommand(intakeSubsystem),
-                new IntakePivotDownCommand(intakeSubsystem)
+                new IntakePivotDownCommand(intakeSubsystem),
+                new WaitCommand(500),
+                new ColourAwareIntakeCommand(intakeSubsystem)
 
         );
 

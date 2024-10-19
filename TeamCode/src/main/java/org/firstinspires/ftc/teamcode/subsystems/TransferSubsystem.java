@@ -15,8 +15,8 @@ public class TransferSubsystem extends SubsystemBase {
 
     // Define variables
     private double backwardsTransferPosition = 0;
-    private double stowedTransferPosition = 0;
-    private double flippedPosition = 1;
+    private double stowedTransferPosition = 0.25;
+    private double flippedPosition = 0.75;
     private double middleGripplerRotation = 0;
     private double leftGripplerRotation = 0;
     private double rightGripplerRotation = 0;
@@ -29,7 +29,7 @@ public class TransferSubsystem extends SubsystemBase {
         gripplerServo = hMap.get(Servo.class, "grippler");
         griggleWristServo = hMap.get(Servo.class, "griggleWrist");
 
-        armRightServo.setDirection(Servo.Direction.REVERSE);
+        //armRightServo.setDirection(Servo.Direction.REVERSE);
 
         stowTransfer();
         griggleWristServo.setPosition(0.5);

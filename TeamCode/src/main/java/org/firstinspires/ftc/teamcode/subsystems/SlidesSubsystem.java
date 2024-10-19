@@ -14,10 +14,12 @@ public class SlidesSubsystem extends SubsystemBase {
     // Define variables
     private int stowedSlidesPosition = 0;
     private int backwardsTransferPosition = 0;
-    private int lowChamberPosition = 0;
-    private int highChamberPosition = 0;
-    private int lowBasketPosition = 0;
-    private int highBasketPosition = 645;
+    private int lowChamberPosition = 150;
+    private int highChamberPosition = 550;
+    private int lowBasketPosition = 610;
+    private int highBasketPosition = 1720;
+
+    private int deliverHighChamberPosition = 400;
 
     public SlidesSubsystem(final HardwareMap hMap) {
         verticalSlideMotor = hMap.get(DcMotor.class, "verticalSlidesMotor");
@@ -32,6 +34,16 @@ public class SlidesSubsystem extends SubsystemBase {
 
     public boolean AreSlidesStowed() {
         return verticalSlideMotor.getCurrentPosition() < (stowedSlidesPosition + 50);
+    }
+
+    public void highChamberDeliver(){
+        verticalSlideMotor.setTargetPosition(deliverHighChamberPosition);
+        verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        verticalSlideMotor.setPower(1);
+    }
+
+    public boolean IsAtHighChamberDeliver(){
+        return verticalSlideMotor.getCurrentPosition() < (deliverHighChamberPosition +50);
     }
 
     public void backwardsTransfer() {

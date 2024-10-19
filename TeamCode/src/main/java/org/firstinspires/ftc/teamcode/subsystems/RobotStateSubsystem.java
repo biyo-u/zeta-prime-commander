@@ -4,8 +4,9 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 
 public class RobotStateSubsystem extends SubsystemBase {
 
+    public static double driveSpeed = 1;
 
-    public IntakeSubsystem.SampleColour desiredSampleColour(){
-        return IntakeSubsystem.SampleColour.NEUTRAL;
-    }
+
+
+
 }

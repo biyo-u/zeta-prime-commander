@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -12,51 +11,46 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 
 public class DriveSubsystem extends SubsystemBase {
 
-    private MecanumDrive mecanum;
+    //private MecanumDrive mecanum;
 
-    private OTOSDrive drive;
-    RevIMU imu;
+    private MecanumDrive drive;
+
+    private Telemetry telemetry;
+
+    public DriveSubsystem(final HardwareMap hMap, Telemetry telemetry){
+
+        this.telemetry = telemetry;
+
+        drive = new MecanumDrive(hMap,new Pose2d(0,0,0));
 
 
-    public DriveSubsystem(final HardwareMap hMap){
-
-        imu = new RevIMU(hMap);
-
-       /* Motor frontLeft =  new Motor(hMap, "leftFront", Motor.GoBILDA.RPM_435);
-        Motor frontRight =  new Motor(hMap, "rightFront", Motor.GoBILDA.RPM_435);
-        Motor backLeft =  new Motor(hMap, "leftBack", Motor.GoBILDA.RPM_435);
-        Motor backRight =  new Motor(hMap, "rightBack", Motor.GoBILDA.RPM_435);
-
-        backLeft.setInverted(true);
-        frontLeft.setInverted(true);
-
-        backRight.setInverted(true);
-
-        mecanum = new MecanumDrive(frontLeft, frontRight,
-                backLeft, backRight);*/
-
-        drive = new OTOSDrive(hMap,new Pose2d(0,0,0));
-
-        imu.init();
     }
 
-    public void drive(double leftX, double leftY, double rightX){
+    public void drive(double leftX, double leftY, double rightX, double scale){
+        Pose2d poseEstimate = drive.pose;
+        double heading = drive.pose.heading.toDouble();
 
-        /*mecanum.driveFieldCentric(
-                leftX, leftY, rightX,  imu.getRotation2d().getDegrees(), false
-        );*/
+        Vector2d sticks = new Vector2d(
+                leftY * scale,
+                -leftX * scale
+        );
+
+        double rotX = sticks.x * Math.cos(-heading) - sticks.y * Math.sin(-heading);
+        double rotY = sticks.x * Math.sin(-heading) + sticks.y * Math.cos(-heading);
+
+        Vector2d updatedVector = new Vector2d(rotX, rotY);
 
         drive.setDrivePowers(new PoseVelocity2d(
-                new Vector2d(
-                        leftY,
-                        -leftX
-                ),
-                -rightX
+                updatedVector,
+                -rightX * scale
         ));
+
 
         drive.updatePoseEstimate();
 

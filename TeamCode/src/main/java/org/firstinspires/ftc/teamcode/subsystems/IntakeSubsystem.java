@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class IntakeSubsystem extends SubsystemBase {
 
     //Define motors and servos
@@ -52,7 +54,14 @@ public class IntakeSubsystem extends SubsystemBase {
         BLUE_OR_NEUTRAL
     }
 
-    public IntakeSubsystem(final HardwareMap hMap){
+    private Telemetry telemetry;
+
+    private boolean isPooping = false;
+
+    public IntakeSubsystem(final HardwareMap hMap, Telemetry telemetry){
+
+        this.telemetry = telemetry;
+
         intakeMotor = hMap.get(DcMotor.class, "intakeMotor");
 
         intakeLeftPivot = hMap.get(Servo.class, "pivotLeftIntake");
@@ -103,6 +112,14 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRightSlide.setPosition(intakeSlidesOutPosition);
     }
 
+    public void SetPoopMode(boolean mode){
+        isPooping = mode;
+    }
+
+    public boolean IsPooping(){
+        return isPooping;
+    }
+
     public boolean AreIntakeSlidesOut() {
         return true;
     }
@@ -147,6 +164,7 @@ public class IntakeSubsystem extends SubsystemBase {
         NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
+
         if(hsvValues[0] > 200) {
             return SampleColour.BLUE;
         }
@@ -156,10 +174,12 @@ public class IntakeSubsystem extends SubsystemBase {
         if(hsvValues[0] >= 20) {
             return SampleColour.RED;
         }
+
         return SampleColour.NONE;
     }
 
     public void setDesiredColourBlue() {
+
         desiredColour = SampleColour.BLUE;
     }
 
@@ -168,6 +188,8 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void setDesiredColourRed() {
+
+
         desiredColour = SampleColour.RED;
     }
 
@@ -183,14 +205,24 @@ public class IntakeSubsystem extends SubsystemBase {
         return true;
     }
 
+    public SampleColour getDesiredIntakeColour(){
+        return  desiredColour;
+    }
 
 
     public void colourAwareIntake(){
 
+            telemetry.addData("Desired:", desiredColour);
+            telemetry.update();
+
             if (getCurrentIntakeColour() == SampleColour.NONE) {
+                poopChuteOpen();
                 this.Intake();
             } else if(getCurrentIntakeColour() != desiredColour){
-                this.Outtake();
+                    if(!IsPooping()) {
+                        this.Outtake();
+                    }
+
             }else {
 
                 this.IntakeOff();
