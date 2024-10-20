@@ -15,11 +15,11 @@ public class TransferSubsystem extends SubsystemBase {
 
     // Define variables
     private double backwardsTransferPosition = 0;
-    private double stowedTransferPosition = 0.25;
+    private double stowedTransferPosition = 0.28;
     private double flippedPosition = 0.75;
-    private double middleGripplerRotation = 0;
+    private double middleGripplerRotation = 0.5;
     private double leftGripplerRotation = 0;
-    private double rightGripplerRotation = 0;
+    private double rightGripplerRotation = 1;
     private double closedGripplerPosition = 0;
     private double openGripplerPosition = 0.3;
 

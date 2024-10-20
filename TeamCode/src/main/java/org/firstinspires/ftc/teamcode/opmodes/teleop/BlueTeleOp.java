@@ -25,6 +25,7 @@ import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
+import org.firstinspires.ftc.teamcode.commands.MiddleGripplerRotationCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.OuttakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.PoopChuteCloseCommand;
@@ -95,24 +96,26 @@ public class BlueTeleOp  extends CommandOpMode {
                         }),
                     new WaitCommand(250),
                     new TeleOpIntakeCommand(intakeSubsystem)
-
-
                 )
 
         ).whenInactive(
                 new SequentialCommandGroup(
                     new IntakeOffCommand(intakeSubsystem),
                     new PoopChuteCloseCommand(intakeSubsystem),
-                    new IntakePivotUpCommand(intakeSubsystem),
+                    new ParallelCommandGroup(
+                        new IntakePivotUpCommand(intakeSubsystem),
+                        new MiddleGripplerRotationCommand(transferSubsystem)
+                    ),
                     new WaitCommand(300), //give the servos time to operate
                     new IntakeSlidesInCommand(intakeSubsystem),
                     new WaitCommand(800), //TODO, wait for now, but we'll look to use a sensor
-                    new CloseGripplerCommand(transferSubsystem),
-                        new ConditionalCommand(
-                                new IntakePivotDownCommand(intakeSubsystem),
-                                new IntakePivotUpCommand(intakeSubsystem),
-                                () -> {return intakeSubsystem.getCurrentIntakeColour() == intakeSubsystem.getDesiredIntakeColour();}
-                        ),
+                    new ConditionalCommand(
+                        new WaitCommand(1),
+                        new SequentialCommandGroup(
+                            new CloseGripplerCommand(transferSubsystem),
+                            new IntakePivotDownCommand(intakeSubsystem)),
+                        () -> {return intakeSubsystem.getCurrentIntakeColour() == IntakeSubsystem.SampleColour.NONE;}
+                    ),
                     new InstantCommand(()-> {
                         driveSpeed = 1;
                         })
@@ -165,10 +168,9 @@ public class BlueTeleOp  extends CommandOpMode {
                 )).whenInactive(
                 new SequentialCommandGroup(
                         new SlidesHighChamberDeliverCommand(slidesSubsystem),
+                        new WaitCommand(200),
                         new OpenGripplerCommand(transferSubsystem),
-                        new WaitCommand(300),
                         new TransferStowCommand(transferSubsystem),
-
                         new InstantCommand(()-> {
                             driveSpeed = 1;
                         }),
@@ -240,6 +242,12 @@ public class BlueTeleOp  extends CommandOpMode {
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
                 new DesiredColourNeutralCommand(intakeSubsystem)
+        );
+
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+                new InstantCommand(()-> {
+                    driveSpeed = 1;
+                })
         );
     }
 }

@@ -15,11 +15,11 @@ public class SlidesSubsystem extends SubsystemBase {
     private int stowedSlidesPosition = 0;
     private int backwardsTransferPosition = 0;
     private int lowChamberPosition = 150;
-    private int highChamberPosition = 550;
+    private int highChamberPosition = 500;
     private int lowBasketPosition = 610;
     private int highBasketPosition = 1720;
 
-    private int deliverHighChamberPosition = 400;
+    private int deliverHighChamberPosition = 0;
 
     public SlidesSubsystem(final HardwareMap hMap) {
         verticalSlideMotor = hMap.get(DcMotor.class, "verticalSlidesMotor");
