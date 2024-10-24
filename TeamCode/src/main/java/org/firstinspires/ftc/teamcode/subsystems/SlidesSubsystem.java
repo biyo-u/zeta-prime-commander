@@ -16,14 +16,24 @@ public class SlidesSubsystem extends SubsystemBase {
     private int backwardsTransferPosition = 0;
     private int lowChamberPosition = 150;
     private int highChamberPosition = 500;
-    private int lowBasketPosition = 610;
-    private int highBasketPosition = 2200;
+    private int lowBasketPosition = 1210;
+    private int highBasketPosition = 3100;
 
     private int deliverHighChamberPosition = 0;
+
+    //IMPORTANT: this value gives the motor some breathing room on the retraction
+    //we can cook motors if this value is too LOW
+    //prob only want to make this number larger than 100
+    private int STOWED_SLIDE_DIFFERENCE = 150;
 
     public SlidesSubsystem(final HardwareMap hMap) {
         verticalSlideMotor = hMap.get(DcMotor.class, "verticalSlidesMotor");
         verticalSlideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void resetVerticalSlides(){
+        verticalSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
     }
 
     public void stowSlides() {
@@ -32,8 +42,16 @@ public class SlidesSubsystem extends SubsystemBase {
         verticalSlideMotor.setPower(1);
     }
 
+    public void NoPowerSlides(){
+        verticalSlideMotor.setPower(0);
+    }
+
+    public double getCurrentSlidePos(){
+        return verticalSlideMotor.getCurrentPosition();
+    }
+
     public boolean AreSlidesStowed() {
-        return verticalSlideMotor.getCurrentPosition() < (stowedSlidesPosition + 50);
+        return verticalSlideMotor.getCurrentPosition() < (stowedSlidesPosition + STOWED_SLIDE_DIFFERENCE);
     }
 
     public void highChamberDeliver(){

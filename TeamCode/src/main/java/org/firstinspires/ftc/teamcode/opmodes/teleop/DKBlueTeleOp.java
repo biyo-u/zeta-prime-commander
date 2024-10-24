@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -81,6 +82,13 @@ public class DKBlueTeleOp extends CommandOpMode {
         register(m_drive);
         m_drive.setDefaultCommand(m_driveCommand);
 
+        //get rid of this when not needed
+        schedule(new RunCommand(() -> {
+                telemetry.addData("Slides:", slidesSubsystem.getCurrentSlidePos());
+                telemetry.update();
+        }
+        ));
+
 
         //Intake
         new Trigger(new BooleanSupplier() {
@@ -155,7 +163,10 @@ public class DKBlueTeleOp extends CommandOpMode {
                             driveSpeed = 1;
                         }),
                         new IntakePivotUpCommand(intakeSubsystem, robotState),
-                        new SlidesStowCommand(slidesSubsystem)
+                        new SlidesStowCommand(slidesSubsystem),
+                        new InstantCommand(()->{
+                            slidesSubsystem.NoPowerSlides();
+                        })
                 )
         );
 
@@ -174,14 +185,14 @@ public class DKBlueTeleOp extends CommandOpMode {
                 //retract and stage if we have the sample
                 new SequentialCommandGroup(
                     new IntakeOffCommand(intakeSubsystem),
+                        new InstantCommand(()-> {
+                            driveSpeed = 1;
+                        }),
                         new ConditionalCommand(
                                 new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState), // ready to transfer
                                 new InstantCommand(), // do nothing, might want to intake again
                                 ()-> intakeSubsystem.hasItemInIntake()
-                        ),
-                        new InstantCommand(()-> {
-                            driveSpeed = 1;
-                        })
+                        )
                 )
 
         );
@@ -232,7 +243,31 @@ public class DKBlueTeleOp extends CommandOpMode {
                         new SlidesStowCommand(slidesSubsystem),
                         new InstantCommand(() ->{
                             robotState.slidePosition = RobotStateSubsystem.SlideHeight.STOW;
+                            //kill power to the slides when they are stowed
+                            slidesSubsystem.NoPowerSlides();
                         })
+
+                )
+        );
+
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+                new SequentialCommandGroup(
+                        new OpenGripplerCommand(transferSubsystem),
+                        new WaitCommand(150),
+
+                        new InstantCommand(()-> {
+                            driveSpeed = 1;
+                        }),
+                        new IntakePivotDownCommand(intakeSubsystem, robotState),
+                        new SlidesStowCommand(slidesSubsystem),
+                        new InstantCommand(() ->{
+                            robotState.slidePosition = RobotStateSubsystem.SlideHeight.STOW;
+                            //kill power to the slides when they are stowed
+                            slidesSubsystem.NoPowerSlides();
+                        }),
+                        new OuttakeOnCommand(intakeSubsystem),
+                        new WaitCommand(100),
+                        new IntakeOffCommand(intakeSubsystem)
 
                 )
         );
@@ -249,7 +284,7 @@ public class DKBlueTeleOp extends CommandOpMode {
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new DesiredColourRedCommand(intakeSubsystem)
+                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);})
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(

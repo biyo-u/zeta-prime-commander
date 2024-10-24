@@ -38,7 +38,7 @@ public class IntakeCommandGroup extends SequentialCommandGroup {
 
                 new IntakeOffCommand(intakeSubsystem),
                 new PoopChuteCloseCommand(intakeSubsystem),
-               // new SlowIntakeCommand(intakeSubsystem),
+
                 new ParallelCommandGroup(
                         new IntakePivotUpCommand(intakeSubsystem, robotState),
                         new MiddleGripplerRotationCommand(transferSubsystem)
@@ -46,6 +46,8 @@ public class IntakeCommandGroup extends SequentialCommandGroup {
                 new WaitCommand(300), //give the servos time to operate
                 new IntakeSlidesInCommand(intakeSubsystem),
                 new WaitCommand(900), //TODO, wait for now, but we'll look to use a sensor
+                new SlowIntakeCommand(intakeSubsystem),
+                new WaitCommand(150),
                 new IntakeOffCommand(intakeSubsystem),
                 new ConditionalCommand(
                         new WaitCommand(1),

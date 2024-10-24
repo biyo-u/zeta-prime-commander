@@ -29,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Define variables
     private double intakeSlidesInPosition = 0.5;
-    private double intakeSlidesOutPosition = 0;
+    private double intakeSlidesOutPosition = 0.02;
 
     private double intakePivotUpPosition = 0;
     private double intakePivotDownPosition = 0.58;
