@@ -32,6 +32,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     }
 
+    public void resetHeading(){
+        drive.pose = new Pose2d(0,0,0);
+    }
+
     public void drive(double leftX, double leftY, double rightX, double scale){
         Pose2d poseEstimate = drive.pose;
         double heading = drive.pose.heading.toDouble();

@@ -4,9 +4,21 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 
 public class RobotStateSubsystem extends SubsystemBase {
 
-    public static double driveSpeed = 1;
+  public enum SlideHeight{
+      STOW,
+      LOW,
+      HIGH
+  }
+
+  public enum PivotState{
+      LOW,
+      HIGH
+  }
 
 
+  public SlideHeight slidePosition = SlideHeight.STOW;
+
+  public PivotState pivotPosition = PivotState.HIGH;
 
 
 }

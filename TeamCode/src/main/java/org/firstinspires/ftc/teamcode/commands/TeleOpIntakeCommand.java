@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 
@@ -12,16 +13,19 @@ public class TeleOpIntakeCommand extends SequentialCommandGroup {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final IntakeSubsystem intakeSubsystem;
-    public TeleOpIntakeCommand(IntakeSubsystem Isubsystem) {
+    private final RobotStateSubsystem robotState;
+
+    public TeleOpIntakeCommand(IntakeSubsystem Isubsystem, RobotStateSubsystem state) {
         intakeSubsystem = Isubsystem;
+        robotState = state;
 
         addCommands(
 
-                new IntakePivotUpCommand(intakeSubsystem),
+                new IntakePivotUpCommand(intakeSubsystem, robotState),
                 new IntakeSlidesOutCommand(intakeSubsystem),
                 new WaitCommand(300),
                 new PoopChuteOpenCommand(intakeSubsystem),
-                new IntakePivotDownCommand(intakeSubsystem),
+                new IntakePivotDownCommand(intakeSubsystem, robotState),
                 new WaitCommand(500),
                 new ColourAwareIntakeCommand(intakeSubsystem)
 

@@ -32,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private double intakeSlidesOutPosition = 0;
 
     private double intakePivotUpPosition = 0;
-    private double intakePivotDownPosition = 0.5;
+    private double intakePivotDownPosition = 0.58;
 
     private double intakePoopOpen = 0.5;
 
@@ -56,7 +56,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private Telemetry telemetry;
 
-    private boolean isPooping = false;
+    private boolean isPooping = true;
 
     public IntakeSubsystem(final HardwareMap hMap, Telemetry telemetry){
 
@@ -96,10 +96,25 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor.setPower(-1);
     }
 
+    public void slowIntake(){
+        intakeMotor.setPower(0.3);
+    }
+
     public void intakeSlidesIn() {
         //Brings the slides in
         intakeLeftSlide.setPosition(intakeSlidesInPosition);
         intakeRightSlide.setPosition(intakeSlidesInPosition);
+    }
+
+    public void IncrSlides(){
+        double currentPos = getIntakeSlidePosition();
+        //slides must be decremented
+        setIntakeSlidePosition(currentPos - 0.01);
+    }
+
+    public boolean hasItemInIntake(){
+        return getCurrentIntakeColour() != SampleColour.NONE;
+
     }
 
     public boolean AreIntakeSlidesIn() {
@@ -118,6 +133,15 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public boolean IsPooping(){
         return isPooping;
+    }
+
+    public double getIntakeSlidePosition(){
+        return intakeLeftSlide.getPosition();
+    }
+
+    public void setIntakeSlidePosition(double amount) {
+        intakeLeftSlide.setPosition(amount);
+        intakeRightSlide.setPosition(amount);
     }
 
     public boolean AreIntakeSlidesOut() {
