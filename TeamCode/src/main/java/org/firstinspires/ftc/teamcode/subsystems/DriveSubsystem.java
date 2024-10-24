@@ -52,7 +52,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         drive.setDrivePowers(new PoseVelocity2d(
                 updatedVector,
-                -rightX * scale
+                -rightX
         ));
 
 

@@ -67,7 +67,11 @@ public class DKBlueTeleOp extends CommandOpMode {
         m_driveOperator = new GamepadEx(gamepad2);
 
         intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
+        //SETUP the starting COLOUR:
+        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);
+
         transferSubsystem = new TransferSubsystem(hardwareMap);
+
         slidesSubsystem = new SlidesSubsystem(hardwareMap);
 
 
@@ -86,6 +90,11 @@ public class DKBlueTeleOp extends CommandOpMode {
             }
         }).whenActive(
                 new SequentialCommandGroup(
+
+                        //give the speed back
+                        new InstantCommand(()-> {
+                            driveSpeed = 1;
+                        }),
                         //make sure we lift the pivot if it is down, it could hit something
                         new ConditionalCommand(
                                 new SequentialCommandGroup(
@@ -101,8 +110,12 @@ public class DKBlueTeleOp extends CommandOpMode {
                                 new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
                                 new InstantCommand(), //just retracting with no sample - do nothing
                                 () -> intakeSubsystem.hasItemInIntake()
-                        )
+                        ),
+                        new InstantCommand(()-> {
+                            driveSpeed = 1;
+                        })
                     )
+
         );
 
         //Move horizontal slides out
@@ -115,7 +128,10 @@ public class DKBlueTeleOp extends CommandOpMode {
                 new ConditionalCommand(
                         new SequentialCommandGroup(
                                 new IntakePivotUpCommand(intakeSubsystem, robotState),
-                                new InstantCommand(intakeSubsystem::IncrSlides)
+                                new InstantCommand(intakeSubsystem::IncrSlides),
+                                new InstantCommand(()-> {
+                                    driveSpeed = 0.7;
+                                })
                         ),
                         new InstantCommand(intakeSubsystem::IncrSlides),
                         () -> robotState.pivotPosition == RobotStateSubsystem.PivotState.LOW
@@ -128,7 +144,7 @@ public class DKBlueTeleOp extends CommandOpMode {
 
                         new TransferFlipCommand(transferSubsystem),
                         new InstantCommand(()-> {
-                            driveSpeed = 0.5;
+                            driveSpeed = 0.7;
                         })
                 )).whenInactive(
                 new SequentialCommandGroup(
@@ -148,7 +164,7 @@ public class DKBlueTeleOp extends CommandOpMode {
                 new SequentialCommandGroup(
                         new OpenGripplerCommand(transferSubsystem),
                         new InstantCommand(()-> {
-                            driveSpeed = 0.3;
+                            driveSpeed = 0.4;
                         }),
                         new PoopChuteOpenCommand(intakeSubsystem),
                         new IntakePivotDownCommand(intakeSubsystem, robotState),
@@ -162,7 +178,10 @@ public class DKBlueTeleOp extends CommandOpMode {
                                 new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState), // ready to transfer
                                 new InstantCommand(), // do nothing, might want to intake again
                                 ()-> intakeSubsystem.hasItemInIntake()
-                        )
+                        ),
+                        new InstantCommand(()-> {
+                            driveSpeed = 1;
+                        })
                 )
 
         );

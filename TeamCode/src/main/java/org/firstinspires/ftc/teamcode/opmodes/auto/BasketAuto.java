@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -18,8 +19,10 @@ import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 @Autonomous(name = "BasketAuto", group = "Autonomous")
 public class BasketAuto  extends CommandOpMode {
 
-    Action dropOffAction;
-    Action parkAction;
+    Action moveToChamberAction;
+    Action moveToSample1Action;
+
+    Action moveToBasket1Action;
 
     IntakeSubsystem intakeSubsystem;
 
@@ -32,21 +35,24 @@ public class BasketAuto  extends CommandOpMode {
         OTOSDrive drive = new OTOSDrive(hardwareMap,
                 new Pose2d(11.8, 61.7, Math.toRadians(90)));
 
-        dropOffAction = drive.actionBuilder(drive.pose)
-                .splineToSplineHeading( new Pose2d(11.1, 8.9, Math.toRadians(90)), Math.toRadians(90))
+        moveToChamberAction = drive.actionBuilder(drive.pose)
+                .splineToConstantHeading(new Vector2d(0,35), Math.toRadians(90)) .build();
+
+        moveToSample1Action = drive.actionBuilder(drive.pose)
+                .splineToLinearHeading(new Pose2d(50,40,Math.toRadians(270)),Math.toRadians(270))
                 .build();
 
-        parkAction = drive.actionBuilder(drive.pose)
-                .splineToSplineHeading( new Pose2d(11.1, 8.9, Math.toRadians(90)), Math.toRadians(90))
-                .build();
+        moveToBasket1Action =   drive.actionBuilder(drive.pose).splineToLinearHeading(new Pose2d(55,50,Math.toRadians(230)),Math.toRadians(230))
+                        .build();
+
 
 
         CommandScheduler.getInstance().schedule(
                 new WaitUntilCommand(this::isStarted).andThen(
                     new SequentialCommandGroup(
-                            new ActionCommand(dropOffAction, null),
-                            new IntakeOnCommand(intakeSubsystem),
-                            new ActionCommand(parkAction, null)
+                            new ActionCommand(moveToChamberAction, null),
+                            new ActionCommand(moveToSample1Action, null),
+                            new ActionCommand(moveToBasket1Action, null)
                     )
                 )
         );

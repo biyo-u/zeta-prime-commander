@@ -113,7 +113,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public boolean hasItemInIntake(){
-        return getCurrentIntakeColour() != SampleColour.NONE;
+        return getCurrentIntakeColour() == getDesiredIntakeColour();
 
     }
 
@@ -190,12 +190,24 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
         if(hsvValues[0] > 200) {
+            if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
+                return SampleColour.BLUE_OR_NEUTRAL;
+            }
             return SampleColour.BLUE;
         }
         if(hsvValues[0] >= 70 && hsvValues[0] <=100) {
+            if(desiredColour == SampleColour.RED_OR_NEUTRAL){
+                return SampleColour.RED_OR_NEUTRAL;
+            }
+            if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
+                return SampleColour.BLUE_OR_NEUTRAL;
+            }
             return SampleColour.NEUTRAL;
         }
         if(hsvValues[0] >= 20) {
+            if(desiredColour == SampleColour.RED_OR_NEUTRAL){
+                return SampleColour.RED_OR_NEUTRAL;
+            }
             return SampleColour.RED;
         }
 
@@ -211,6 +223,9 @@ public class IntakeSubsystem extends SubsystemBase {
         return true;
     }
 
+    public void setDesiredColour(SampleColour colour){
+        desiredColour = colour;
+    }
     public void setDesiredColourRed() {
 
 
@@ -239,10 +254,19 @@ public class IntakeSubsystem extends SubsystemBase {
             telemetry.addData("Desired:", desiredColour);
             telemetry.update();
 
-            if (getCurrentIntakeColour() == SampleColour.NONE) {
+            SampleColour currentColour = getCurrentIntakeColour();
+
+            if (currentColour == SampleColour.NONE) {
                 poopChuteOpen();
                 this.Intake();
-            } else if(getCurrentIntakeColour() != desiredColour){
+            }
+            else if(desiredColour == SampleColour.BLUE_OR_NEUTRAL && (currentColour == SampleColour.BLUE || currentColour == SampleColour.NEUTRAL)){
+                this.IntakeOff();
+            }
+            else if(desiredColour == SampleColour.RED_OR_NEUTRAL && (currentColour == SampleColour.RED || currentColour == SampleColour.NEUTRAL)){
+                this.IntakeOff();
+            }
+            else if(getCurrentIntakeColour() != desiredColour){
                     if(!IsPooping()) {
                         this.Outtake();
                     }
