@@ -1,4 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto;
+import androidx.collection.ArraySet;
+
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -50,9 +52,9 @@ public class BasketAuto  extends CommandOpMode {
         CommandScheduler.getInstance().schedule(
                 new WaitUntilCommand(this::isStarted).andThen(
                     new SequentialCommandGroup(
-                            new ActionCommand(moveToChamberAction, null),
-                            new ActionCommand(moveToSample1Action, null),
-                            new ActionCommand(moveToBasket1Action, null)
+                            new ActionCommand(moveToChamberAction, new ArraySet<>()),
+                            new ActionCommand(moveToSample1Action, new ArraySet<>()),
+                            new ActionCommand(moveToBasket1Action, new ArraySet<>())
                     )
                 )
         );
