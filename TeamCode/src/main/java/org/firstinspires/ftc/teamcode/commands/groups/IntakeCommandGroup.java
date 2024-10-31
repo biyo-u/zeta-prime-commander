@@ -37,15 +37,16 @@ public class IntakeCommandGroup extends SequentialCommandGroup {
         addCommands(
 
                 new IntakeOffCommand(intakeSubsystem),
-                new PoopChuteCloseCommand(intakeSubsystem),
 
                 new ParallelCommandGroup(
                         new IntakePivotUpCommand(intakeSubsystem, robotState),
                         new MiddleGripplerRotationCommand(transferSubsystem)
                 ),
+                new PoopChuteCloseCommand(intakeSubsystem),
+
                 new WaitCommand(300), //give the servos time to operate
-                new IntakeSlidesInCommand(intakeSubsystem),
-                new WaitCommand(900), //TODO, wait for now, but we'll look to use a sensor
+                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
+                new WaitCommand(100), //TODO, wait for now, but we'll look to use a sensor
                 new SlowIntakeCommand(intakeSubsystem),
                 new WaitCommand(150),
                 new IntakeOffCommand(intakeSubsystem),
@@ -53,6 +54,7 @@ public class IntakeCommandGroup extends SequentialCommandGroup {
                         new WaitCommand(1),
                         new SequentialCommandGroup(
                                 new CloseGripplerCommand(transferSubsystem),
+                                new WaitCommand(150),
                                 new IntakePivotDownCommand(intakeSubsystem, robotState)),
                         () -> {return intakeSubsystem.getCurrentIntakeColour() == IntakeSubsystem.SampleColour.NONE;}
                 )

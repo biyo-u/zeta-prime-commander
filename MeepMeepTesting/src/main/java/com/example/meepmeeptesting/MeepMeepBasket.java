@@ -14,29 +14,36 @@ public class MeepMeepBasket {
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(50, 50, Math.toRadians(180), Math.toRadians(180), 15)
-                .setDimensions(18,18)
+                .setDimensions(17,17.5)
                 .build();
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(38, 64, Math.toRadians(90)))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-14.8, -64, Math.toRadians(-90)))
 
-                        .splineToConstantHeading(new Vector2d(0,35), Math.toRadians(90))
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-8.5, -35, Math.toRadians(-90)), Math.toRadians(90))
+
                 //drop off specimen
-
-                        .splineToLinearHeading(new Pose2d(50,40,Math.toRadians(270)),Math.toRadians(270))
+                        .setTangent(Math.toRadians(-131))
+                        .splineToLinearHeading(new Pose2d(-35,-50,Math.toRadians(-235)),Math.toRadians(-131))
                 //pick up the first sample
-                    .splineToLinearHeading(new Pose2d(55,50,Math.toRadians(230)),Math.toRadians(230))
+                        .setTangent(Math.toRadians(180))
+                    .splineToLinearHeading(new Pose2d(-55,-50,Math.toRadians(-315)),Math.toRadians(180))
                 //drop off in the basket
-                     .splineToLinearHeading(new Pose2d(58,40,Math.toRadians(270)),Math.toRadians(270))
+                        .setTangent(Math.toRadians(90))
+                     .splineToLinearHeading(new Pose2d(-58,-40,Math.toRadians(-270)),Math.toRadians(90))
 
-                .splineToLinearHeading(new Pose2d(55,50,Math.toRadians(230)),Math.toRadians(230))
+                        .setTangent(Math.toRadians(-90))
+                .splineToLinearHeading(new Pose2d(-55,-50,Math.toRadians(-315)),Math.toRadians(-90))
                 //drop off in the basket
 
-                .splineToLinearHeading(new Pose2d(58,40,Math.toRadians(320)),Math.toRadians(320))
+                        .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-58,-40,Math.toRadians(-235)),Math.toRadians(90))
 
-                .splineToLinearHeading(new Pose2d(53,50,Math.toRadians(230)),Math.toRadians(230))
+                        .setTangent(Math.toRadians(-90))
+                .splineToLinearHeading(new Pose2d(-53,-50,Math.toRadians(-315)),Math.toRadians(-90))
 
-
-                .splineToLinearHeading(new Pose2d(30,10,Math.toRadians(0)),Math.toRadians(0))
+                        .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-30,-10,Math.toRadians(180)),Math.toRadians(0))
 
 
                 .build());

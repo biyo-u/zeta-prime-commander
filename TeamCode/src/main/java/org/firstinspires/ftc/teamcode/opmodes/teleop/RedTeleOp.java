@@ -12,27 +12,27 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.AscentLowRungCommand;
+import org.firstinspires.ftc.teamcode.commands.AscentStowCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.DefaultDrive;
 import org.firstinspires.ftc.teamcode.commands.DesiredColourBlueCommand;
 import org.firstinspires.ftc.teamcode.commands.DesiredColourNeutralCommand;
-import org.firstinspires.ftc.teamcode.commands.DesiredColourRedCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.OuttakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.PoopChuteOpenCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesLowBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
-import org.firstinspires.ftc.teamcode.commands.TeleOpIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
 import org.firstinspires.ftc.teamcode.commands.groups.IntakeCommandGroup;
+import org.firstinspires.ftc.teamcode.subsystems.AscentSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
@@ -41,8 +41,8 @@ import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 
 import java.util.function.BooleanSupplier;
 
-@TeleOp(name = "DK Blue TeleOp")
-public class DKBlueTeleOp extends CommandOpMode {
+@TeleOp(name = "Red TeleOp")
+public class RedTeleOp extends CommandOpMode {
 // rightn trigger: basket
     // left trigger slides out and intake
     // right bumper speciman chamber
@@ -51,6 +51,8 @@ public class DKBlueTeleOp extends CommandOpMode {
     private IntakeSubsystem intakeSubsystem;
     private TransferSubsystem transferSubsystem;
     private SlidesSubsystem slidesSubsystem;
+
+    private AscentSubsystem ascentSubsystem;
 
     private RobotStateSubsystem robotState;
     private GamepadEx m_driveDriver;
@@ -69,11 +71,13 @@ public class DKBlueTeleOp extends CommandOpMode {
 
         intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
         //SETUP the starting COLOUR:
-        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);
+        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED_OR_NEUTRAL);
 
         transferSubsystem = new TransferSubsystem(hardwareMap);
 
         slidesSubsystem = new SlidesSubsystem(hardwareMap);
+
+        ascentSubsystem = new AscentSubsystem(hardwareMap);
 
 
 
@@ -85,6 +89,9 @@ public class DKBlueTeleOp extends CommandOpMode {
         //get rid of this when not needed
         schedule(new RunCommand(() -> {
                 telemetry.addData("Slides:", slidesSubsystem.getCurrentSlidePos());
+                telemetry.addData("Magnet", transferSubsystem.IsTransferClosed());
+                telemetry.addData("ML", ascentSubsystem.getLeftMotorPos());
+                telemetry.addData("MR", ascentSubsystem.getRightMotorPos());
                 telemetry.update();
         }
         ));
@@ -108,9 +115,9 @@ public class DKBlueTeleOp extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         new IntakePivotUpCommand(intakeSubsystem,robotState),
                                         new WaitCommand(300),
-                                        new IntakeSlidesInCommand(intakeSubsystem)
+                                        new IntakeSlidesInCommand(intakeSubsystem,transferSubsystem)
                                 ),
-                                new IntakeSlidesInCommand(intakeSubsystem),
+                                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
                                 () -> robotState.pivotPosition == RobotStateSubsystem.PivotState.LOW
                         ),
 
@@ -296,6 +303,39 @@ public class DKBlueTeleOp extends CommandOpMode {
                     driveSpeed = 1;
                 })
         );
+
+        //reset the hooks - not ready for climb
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new InstantCommand(()-> {
+                    ascentSubsystem.ascentOpenHooks();
+                })
+        );
+
+        //operator - lift slides and put hooks into position.
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new SequentialCommandGroup(
+                        new SlidesLowBasketCommand(slidesSubsystem),
+                    new InstantCommand(()-> {
+                        ascentSubsystem.ascentCloseHooks();
+                    })
+                )
+        );
+
+        //go for the climb - disable the servos to prevent breakage.
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new SequentialCommandGroup(
+                        new InstantCommand(() ->{
+                            ascentSubsystem.disableServos();
+                        }),
+                        new AscentLowRungCommand(ascentSubsystem)
+                )
+        );
+
+        //reset the hang
+        m_driveOperator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
+               new AscentStowCommand(ascentSubsystem)
+        );
+
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new InstantCommand(()-> {

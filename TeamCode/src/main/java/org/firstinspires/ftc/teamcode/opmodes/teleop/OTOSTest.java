@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.subsystems.OTOSDriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 
 @TeleOp(name = "OTOS TEST")
+@Disabled
 public class OTOSTest extends CommandOpMode {
 
     private OTOSDriveSubsystem m_drive;

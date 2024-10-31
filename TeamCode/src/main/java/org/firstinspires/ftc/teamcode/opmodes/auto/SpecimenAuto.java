@@ -96,7 +96,7 @@ public class SpecimenAuto extends CommandOpMode {
                                     new ParallelCommandGroup(
                                         new AutoIntakeCommand(intakeSubsystem,transferSubsystem,slidesSubsystem),
                                         new ActionCommand(leftSampleAction, new ArraySet<>())),
-                                    new IntakeSlidesInCommand(intakeSubsystem),
+                                    new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
                                     new CloseGripplerCommand(transferSubsystem),
                                     new SlidesBackwardsTransferCommand(slidesSubsystem),
                                     new TransferBackwardCommand(transferSubsystem),
@@ -109,7 +109,7 @@ public class SpecimenAuto extends CommandOpMode {
                                         new IntakeSlidesOutCommand(intakeSubsystem),
                                         new ActionCommand(middleSampleAction, new ArraySet<>())
                                     ),
-                                    new IntakeSlidesInCommand(intakeSubsystem),
+                                    new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
                                     new CloseGripplerCommand(transferSubsystem),
                                     new SlidesBackwardsTransferCommand(slidesSubsystem),
                                     new TransferBackwardCommand(transferSubsystem),

@@ -1,33 +1,36 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 
-public class IntakeSlidesInCommand extends CommandBase {
+public class AutoOnlyIntakeCommand extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final IntakeSubsystem intakeSubsystem;
 
-    private final TransferSubsystem transferSubsystem;
+    private ElapsedTime timer;
+
+    private boolean pooping = false;
 
 
-    public IntakeSlidesInCommand(IntakeSubsystem subsystem, TransferSubsystem transfer) {
+    public AutoOnlyIntakeCommand(IntakeSubsystem subsystem) {
         intakeSubsystem = subsystem;
-        transferSubsystem = transfer;
+        timer = new ElapsedTime();
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
-        //turn outtake on
-        intakeSubsystem.intakeSlidesIn();
+
     }
+
 
     @Override
     public boolean isFinished() {
-        return transferSubsystem.IsTransferClosed();
+        return intakeSubsystem.getCurrentIntakeColour() == intakeSubsystem.getDesiredIntakeColour();
+
     }
 }

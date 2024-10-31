@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -13,9 +14,11 @@ public class TransferSubsystem extends SubsystemBase {
     private Servo gripplerServo;
     private Servo griggleWristServo;
 
+    private DigitalChannel magnetSensor;  // Digital channel Object
+
     // Define variables
     private double backwardsTransferPosition = 0;
-    private double stowedTransferPosition = 0.26;
+    private double stowedTransferPosition = 0.29;
     private double flippedPosition = 0.8;
     private double middleGripplerRotation = 0.5;
     private double leftGripplerRotation = 0;
@@ -28,6 +31,9 @@ public class TransferSubsystem extends SubsystemBase {
         armRightServo = hMap.get(Servo.class, "armRight");
         gripplerServo = hMap.get(Servo.class, "grippler");
         griggleWristServo = hMap.get(Servo.class, "griggleWrist");
+        magnetSensor = hMap.get(DigitalChannel.class, "magnet");
+
+        magnetSensor.setMode(DigitalChannel.Mode.INPUT);
 
         //armRightServo.setDirection(Servo.Direction.REVERSE);
         gripplerServo.setDirection(Servo.Direction.REVERSE);
@@ -55,6 +61,10 @@ public class TransferSubsystem extends SubsystemBase {
     public void flipTransfer() {
         armLeftServo.setPosition(flippedPosition);
         armRightServo.setPosition(flippedPosition);
+    }
+
+    public boolean IsTransferClosed(){
+        return !magnetSensor.getState();
     }
 
     public boolean IsTransferFlipped() {

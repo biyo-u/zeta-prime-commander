@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.hardware.ServoEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -11,25 +13,29 @@ public class AscentSubsystem extends SubsystemBase {
     private DcMotor ascentLeftMotor;
     private DcMotor ascentRightMotor;
 
-    private Servo ascentLeftHook;
-    private Servo ascentRightHook;
+    private ServoEx ascentLeftHook;
+    private ServoEx ascentRightHook;
 
     // Define variables
     private int ascentStowedPosition = 0;
     private int ascentLowRungPreparedPosition = 0;
-    private int ascentLowRungPosition = 0;
+    private int ascentLowRungPosition = 6400;
     private int ascentHighRungPosition = 0;
     private int ascentFinishedLevel3Position = 0;
 
-    private int ascentOpenHookPosition = 0;
-    private int ascentClosedHookPosition = 0;
+    private double ascentOpenHookPosition = 0.8;
+    private double ascentClosedHookPosition = 0;
 
     public AscentSubsystem(final HardwareMap hMap) {
         ascentLeftMotor = hMap.get(DcMotor.class, "ascentLeftMotor");
         ascentRightMotor = hMap.get(DcMotor.class, "ascentRightMotor");
+        ascentRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ascentLeftHook = hMap.get(Servo.class, "ascentLeftHook");
-        ascentRightHook = hMap.get(Servo.class, "ascentRightHook");
+        ascentLeftHook = hMap.get(ServoEx.class, "ascentLeftHook");
+        ascentLeftHook.setInverted(true);
+        ascentRightHook = hMap.get(ServoEx.class, "ascentRightHook");
+
+        ascentCloseHooks();
     }
 
     public void ascentStow() {
@@ -74,6 +80,14 @@ public class AscentSubsystem extends SubsystemBase {
         return (ascentLeftMotor.getCurrentPosition() > (ascentLowRungPosition - 50)) && (ascentRightMotor.getCurrentPosition() > (ascentLowRungPosition - 50));
     }
 
+    public int getLeftMotorPos(){
+        return ascentLeftMotor.getCurrentPosition();
+    }
+
+    public int getRightMotorPos(){
+        return ascentRightMotor.getCurrentPosition();
+    }
+
     public void ascentHighRung() {
         //Stows the ascent mechanism
         ascentLeftMotor.setTargetPosition(ascentHighRungPosition);
@@ -105,6 +119,13 @@ public class AscentSubsystem extends SubsystemBase {
     public void ascentOpenHooks() {
         ascentLeftHook.setPosition(ascentOpenHookPosition);
         ascentRightHook.setPosition(ascentOpenHookPosition);
+    }
+
+    public void disableServos(){
+
+        ascentLeftHook.disable();
+        ascentRightHook.disable();
+
     }
 
     public boolean AreAscentHooksOpen() {
