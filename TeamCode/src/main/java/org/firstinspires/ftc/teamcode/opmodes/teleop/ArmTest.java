@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -48,11 +49,17 @@ public class ArmTest extends LinearOpMode {
     private DcMotor arm = null;
     private DcMotor slide = null;
 
+    private Servo hookLeft;
+    private Servo hookRight;
 
     @Override
     public void runOpMode() {
        // arm  = hardwareMap.get(DcMotor.class, "arm");
         slide = hardwareMap.get(DcMotor.class,"verticalSlidesMotor");
+
+        hookLeft = hardwareMap.get(Servo.class, "ascentLeftHook");
+        hookRight = hardwareMap.get(Servo.class, "ascentRightHook");
+
         slide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //arm.setDirection(DcMotor.Direction.REVERSE);
@@ -66,7 +73,15 @@ public class ArmTest extends LinearOpMode {
 
            if(gamepad1.a){
              //  arm.setPower(1);
+               hookLeft.setPosition(1);
+               hookRight.setPosition(1);
            }
+
+            if(gamepad1.b){
+                //  arm.setPower(1);
+                hookLeft.setPosition(0);
+                hookRight.setPosition(0);
+            }
            telemetry.addData("Slides", slide.getCurrentPosition());
            telemetry.update();
         }

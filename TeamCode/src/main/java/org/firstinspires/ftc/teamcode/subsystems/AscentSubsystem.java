@@ -13,8 +13,8 @@ public class AscentSubsystem extends SubsystemBase {
     private DcMotor ascentLeftMotor;
     private DcMotor ascentRightMotor;
 
-    private ServoEx ascentLeftHook;
-    private ServoEx ascentRightHook;
+    private Servo ascentLeftHook;
+    private Servo ascentRightHook;
 
     // Define variables
     private int ascentStowedPosition = 0;
@@ -23,17 +23,21 @@ public class AscentSubsystem extends SubsystemBase {
     private int ascentHighRungPosition = 0;
     private int ascentFinishedLevel3Position = 0;
 
-    private double ascentOpenHookPosition = 0.8;
-    private double ascentClosedHookPosition = 0;
+    private double ascentOpenHookPosition = 0;
+    private double ascentClosedHookPosition = 0.3;
 
     public AscentSubsystem(final HardwareMap hMap) {
         ascentLeftMotor = hMap.get(DcMotor.class, "ascentLeftMotor");
         ascentRightMotor = hMap.get(DcMotor.class, "ascentRightMotor");
-        ascentRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        ascentLeftHook = hMap.get(ServoEx.class, "ascentLeftHook");
-        ascentLeftHook.setInverted(true);
-        ascentRightHook = hMap.get(ServoEx.class, "ascentRightHook");
+
+        ascentLeftHook = hMap.get(Servo.class, "ascentLeftHook");
+        ascentRightHook = hMap.get(Servo.class, "ascentRightHook");
+
+        //ascentRightHook.setDirection(Servo.Direction.REVERSE);
+
+        ascentLeftHook.getController().pwmEnable();
+        ascentRightHook.getController().pwmEnable();
 
         ascentCloseHooks();
     }
@@ -123,8 +127,8 @@ public class AscentSubsystem extends SubsystemBase {
 
     public void disableServos(){
 
-        ascentLeftHook.disable();
-        ascentRightHook.disable();
+        ascentLeftHook.getController().pwmDisable();
+        ascentRightHook.getController().pwmDisable();
 
     }
 

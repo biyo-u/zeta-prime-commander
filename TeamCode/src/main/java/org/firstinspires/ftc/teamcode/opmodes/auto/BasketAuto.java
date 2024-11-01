@@ -21,18 +21,24 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
+import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
+import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
+import org.firstinspires.ftc.teamcode.commands.groups.DeliveryCommandGroup;
+import org.firstinspires.ftc.teamcode.commands.groups.DeliveryResetCommandGroup;
 import org.firstinspires.ftc.teamcode.commands.groups.IntakeCommandGroup;
+import org.firstinspires.ftc.teamcode.subsystems.AscentSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
@@ -70,6 +76,8 @@ public class BasketAuto  extends CommandOpMode {
 
     SlidesSubsystem slidesSubsystem;
 
+    AscentSubsystem ascentSubsystem;
+
     @Override
     public void initialize() {
 
@@ -77,6 +85,7 @@ public class BasketAuto  extends CommandOpMode {
         transferSubsystem = new TransferSubsystem(hardwareMap);
         robotState = new RobotStateSubsystem();
         slidesSubsystem = new SlidesSubsystem(hardwareMap);
+        ascentSubsystem = new AscentSubsystem(hardwareMap);
 
 
         // instantiate your MecanumDrive at a particular pose.
@@ -84,7 +93,7 @@ public class BasketAuto  extends CommandOpMode {
                 new Pose2d(-14.8, -64, Math.toRadians(-90)));
 
         //pose to the submersible wall
-        Pose2d dropOffPose = new Pose2d(-3.5, -34, Math.toRadians(-90));
+        Pose2d dropOffPose = new Pose2d(-3.4, -32.5, Math.toRadians(-90));
 
         dropOffPreload = drive.actionBuilder(drive.pose)
                 .setTangent(Math.toRadians(90))
@@ -92,7 +101,7 @@ public class BasketAuto  extends CommandOpMode {
                 .build();
 
         //pose to the first sample
-        Pose2d firstSamplePose = new Pose2d(-26,-55,Math.toRadians(-240));
+        Pose2d firstSamplePose = new Pose2d(-26,-59,Math.toRadians(-240));
 
         firstSample = drive.actionBuilder(dropOffPose)
                 .setTangent(Math.toRadians(-131))
@@ -100,14 +109,14 @@ public class BasketAuto  extends CommandOpMode {
                 .build();
 
         //pose after the slow move in
-        Pose2d slowMoveForward = new Pose2d(-26, -49, Math.toRadians(-240));
+        Pose2d slowMoveForward = new Pose2d(-26, -49, Math.toRadians(-241));
 
         firstSampleSlowMoveIn = drive.actionBuilder(firstSamplePose)
-                .setTangent(Math.toRadians(-240))
-                .splineToLinearHeading(slowMoveForward,Math.toRadians(-240), new TranslationalVelConstraint(10))
+                .setTangent(Math.toRadians(-241))
+                .splineToLinearHeading(slowMoveForward,Math.toRadians(-241), new TranslationalVelConstraint(10))
                  .build();
 
-        Pose2d deliverPose = new Pose2d(-50,-55,Math.toRadians(-315));
+        Pose2d deliverPose = new Pose2d(-45,-58,Math.toRadians(-315));
 
         deliverFirstSample = drive.actionBuilder(slowMoveForward)
                 //pick up the first sample
@@ -115,96 +124,59 @@ public class BasketAuto  extends CommandOpMode {
                 .splineToLinearHeading(deliverPose,Math.toRadians(180))
                 .build();
 
-        Pose2d deliverFirstSampleMoveInPose = new Pose2d(-53,-58, Math.toRadians(-315));
+        Pose2d deliverFirstSampleMoveInPose = new Pose2d(-48,-61, Math.toRadians(-315));
 
         deliverFirstSampleMoveIn = drive.actionBuilder(deliverPose)
                 .splineToLinearHeading(deliverFirstSampleMoveInPose, Math.toRadians(-90))
                 .build();
 
+        //Y -64 is on the wall
+
+        Pose2d secondSamplePose = new Pose2d(-32,-60,Math.toRadians(-241));
+
         secondSample = drive.actionBuilder(deliverPose)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-52,-59,Math.toRadians(-277)),Math.toRadians(90))
+                .splineToLinearHeading(secondSamplePose,Math.toRadians(90))
                 .build();
 
-        secondSampleSlowMoveIn = drive.actionBuilder(new Pose2d(-52,-59,Math.toRadians(-277)))
-                .splineToLinearHeading(new Pose2d(-52,-54,Math.toRadians(-277)), Math.toRadians(90), new TranslationalVelConstraint(10))
+        Pose2d secondSampleMoveInPose = new Pose2d(-37,-50,Math.toRadians(-241));
+
+
+        secondSampleSlowMoveIn = drive.actionBuilder(secondSamplePose)
+                .splineToLinearHeading(secondSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(5))
                 .build();
 
-        deliverSecondSample = drive.actionBuilder(new Pose2d(-52,-54,Math.toRadians(-277)))
+        Pose2d deliverSecondSamplePose = new Pose2d(-50,-55,Math.toRadians(-315));
+
+        deliverSecondSample = drive.actionBuilder(secondSampleMoveInPose)
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50,-55,Math.toRadians(-315)),Math.toRadians(-90))
+                .splineToLinearHeading(deliverSecondSamplePose,Math.toRadians(-90))
                 .build();
 
-        deliverSecondSampleMoveIn = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
+        deliverSecondSampleMoveIn = drive.actionBuilder(deliverSecondSamplePose)
                 .splineToLinearHeading(deliverFirstSampleMoveInPose, Math.toRadians(-90))
                 .build();
 
         thirdSample = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-55,-59,Math.toRadians(-277)),Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-43,-59,Math.toRadians(-242)),Math.toRadians(90))
                 .build();
 
-        thirdSampleSlowMoveIn = drive.actionBuilder(new Pose2d(-55,-59,Math.toRadians(-277)))
-                .splineToLinearHeading(new Pose2d(-55,-50,Math.toRadians(-277)), Math.toRadians(90), new TranslationalVelConstraint(10))
+        thirdSampleSlowMoveIn = drive.actionBuilder(new Pose2d(-43,-59,Math.toRadians(-242)))
+                .splineToLinearHeading(new Pose2d(-46,-49,Math.toRadians(-242)), Math.toRadians(90), new TranslationalVelConstraint(3))
                 .build();
 
-        deliverThirdSample = drive.actionBuilder(new Pose2d(-55,-50,Math.toRadians(-277)))
+        deliverThirdSample = drive.actionBuilder(new Pose2d(-46,-49,Math.toRadians(-242)))
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-55,-45,Math.toRadians(-315)),Math.toRadians(-90))
+                .splineToLinearHeading(new Pose2d(-50,-55,Math.toRadians(-315)),Math.toRadians(-90))
                 .build();
 
-        park = drive.actionBuilder(new Pose2d(-53,-50,Math.toRadians(-315)))
+        park = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-30,-10,Math.toRadians(180)),Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(-10,-10,Math.toRadians(180)),Math.toRadians(0))
                 .build();
 
-
-
-        /*pleaseWork = drive.actionBuilder(drive.pose)
-                //Drop Off Specimen
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-8.5, -35, Math.toRadians(-90)), Math.toRadians(90))
-                .waitSeconds(0.5)
-
-                //To first sample
-                .setTangent(Math.toRadians(-131))
-                .splineToLinearHeading(new Pose2d(-25,-50,Math.toRadians(-235)),Math.toRadians(-131))
-                .waitSeconds(0.5)
-
-                //Drop first sample
-                .setTangent(Math.toRadians(180))
-                .splineToLinearHeading(new Pose2d(-50,-62,Math.toRadians(-315)),Math.toRadians(180))
-                .waitSeconds(0.5)
-
-                //To second sample
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-50,-55,Math.toRadians(-270)),Math.toRadians(90))
-                .waitSeconds(0.5)
-
-                //Drop second sample
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50,-62,Math.toRadians(-315)),Math.toRadians(-90))
-                .waitSeconds(0.5)
-
-                //To third sample
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-40,-50,Math.toRadians(-230)),Math.toRadians(90))
-                .waitSeconds(0.5)
-
-                //Drop third sample
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50,-62,Math.toRadians(-315)),Math.toRadians(-90))
-                .waitSeconds(0.5)
-
-                //Park
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-17,-10,Math.toRadians(180)),Math.toRadians(45))
-                .build();
-
-        Action builtPart1 = part1.build();
-        Action builtPart2 = part2.build();
-        */
-
+        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.NEUTRAL);
         intakeSubsystem.intakePivotDown();
         transferSubsystem.closeGrippler();
 
@@ -215,7 +187,7 @@ public class BasketAuto  extends CommandOpMode {
 
                             new ActionCommand(dropOffPreload, new ArraySet<>()),
 
-                            new WaitCommand(200),
+                            new WaitCommand(100),
                             new TransferFlipCommand(transferSubsystem),
                             new WaitCommand(400),
                             new SequentialCommandGroup(
@@ -229,84 +201,121 @@ public class BasketAuto  extends CommandOpMode {
                                         slidesSubsystem.NoPowerSlides();
                                     })
                             ),
-
+                            // specimen is now delivered
 
                             new ActionCommand(firstSample, new ArraySet<>()),
                             new ParallelCommandGroup(
                                 new SequentialCommandGroup(
                                         new IntakeSlidesOutCommand(intakeSubsystem),
                                         new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                        new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
+                                        new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                 ),
                                 new SequentialCommandGroup(
                                         new WaitCommand(500), //time to settle in
                                         new ActionCommand(firstSampleSlowMoveIn, new ArraySet<>())
                                 )
                             ),
-                            new WaitCommand(500), //TODO - use the sensor
-                            new ConditionalCommand(
-                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new InstantCommand(), //just retracting with no sample - do nothing
-                                    () -> intakeSubsystem.hasItemInIntake()
-                            ),
-                            new ActionCommand(deliverFirstSample, new ArraySet<>()),
-
-                            new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
-                                    new WaitCommand(200),
-                                    new ParallelCommandGroup(
-                                            //new SlidesHighBasketCommand(slidesSubsystem),
-                                            new TransferFlipCommand(transferSubsystem)
-                                    )
-                            ),
-
-                           new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
-                           new OpenGripplerCommand(transferSubsystem),
-                           new WaitCommand(500),
-                           //new SlidesStowCommand(slidesSubsystem),
-                           new TransferStowCommand(transferSubsystem),
-
-
-
-                            new ActionCommand(secondSample, new ArraySet<>()),
-                            new ParallelCommandGroup(
-                                    new SequentialCommandGroup(
-                                            new IntakeSlidesOutCommand(intakeSubsystem),
-                                            new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
-                                    ),
-                                    new SequentialCommandGroup(
-                                            new WaitCommand(500), //time to settle in
-                                            new ActionCommand(secondSampleSlowMoveIn, new ArraySet<>())
-                                    )
-                            ),
-                            new WaitCommand(500), //TODO - use the sensor
-                            new ConditionalCommand(
-                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new InstantCommand(), //just retracting with no sample - do nothing
-                                    () -> intakeSubsystem.hasItemInIntake()
-                            ),
-                            new ActionCommand(deliverSecondSample, new ArraySet<>()),
-
-                            new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
-                                    new WaitCommand(200),
-                                    new ParallelCommandGroup(
-                                            //new SlidesHighBasketCommand(slidesSubsystem),
-                                            new TransferFlipCommand(transferSubsystem)
-                                    )
-                            ),
-
-                            new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
-                            new OpenGripplerCommand(transferSubsystem),
                             new WaitCommand(500),
-                            //new SlidesStowCommand(slidesSubsystem),
-                            new TransferStowCommand(transferSubsystem),
+                            new ConditionalCommand(
+                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+                                    new SequentialCommandGroup(
+                                            new IntakeOffCommand(intakeSubsystem), //just retracting with no sample - do nothing
+                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
+                                    ),
+                                    () -> true// intakeSubsystem.hasItemInIntake()
+                            ),
 
 
+                            new SequentialCommandGroup(
+                                    new CloseGripplerCommand(transferSubsystem),
+                                    new WaitCommand(200),
+                                    new ConditionalCommand(
+                                            // do the drop off if we have the sample
+                                             new SequentialCommandGroup(
+                                                    new ParallelCommandGroup(
+                                                         new SequentialCommandGroup(
+                                                            new ActionCommand(deliverFirstSample, new ArraySet<>()),
+                                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                                         )
+                                                    ),
+                                                     new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
+                                                     new OpenGripplerCommand(transferSubsystem),
+                                                     new WaitCommand(250)
+
+                                             ),
+                                             //don't do the drop off - we don't have the sample
+                                             new SequentialCommandGroup(
+                                                     /*new InstantCommand(() ->{
+                                                        telemetry.addData("No Item", "No sample found");
+                                                        telemetry.update();
+                                                     }),*/
+                                                     new IntakeOffCommand(intakeSubsystem),
+                                                     new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
+                                             ),
+                                            () -> true//intakeSubsystem.hasItemInIntake()
+                                            //TODO: The hasItemInIntake needs some work - not consistent
+                                    )
+
+                            ),
+
+                            new ParallelCommandGroup(
+
+                                    new ActionCommand(secondSample, new ArraySet<>()),
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
+                            ),
+                            new ParallelCommandGroup(
+                                    new SequentialCommandGroup(
+                                            new IntakeSlidesOutCommand(intakeSubsystem),
+                                            new IntakePivotDownCommand(intakeSubsystem, robotState),
+                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
+                                            ),
+                                    new SequentialCommandGroup(
+                                        new WaitCommand(500),
+                                        new ActionCommand(secondSampleSlowMoveIn, new ArraySet<>())
+                                    )
+
+                            ),
+                            new WaitCommand(500),
+                            new ConditionalCommand(
+                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+                                    new SequentialCommandGroup( //don't have anything in the intake
+                                            new IntakeOffCommand(intakeSubsystem),
+                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
+                                    ),
+                                    () -> true// intakeSubsystem.hasItemInIntake()
+                            ),
 
 
-                            new ActionCommand(thirdSample, new ArraySet<>()),
+                            new SequentialCommandGroup(
+                                    new CloseGripplerCommand(transferSubsystem),
+                                    new ConditionalCommand(
+                                            // do the drop off if we have the sample
+                                            new SequentialCommandGroup(
+                                                    new ParallelCommandGroup(
+                                                            new ActionCommand(deliverSecondSample, new ArraySet<>()),
+                                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                                    ),
+                                                    new ActionCommand(deliverSecondSampleMoveIn, new ArraySet<>()),
+                                                    new OpenGripplerCommand(transferSubsystem),
+                                                    new WaitCommand(250)
+                                            ),
+                                            //don't do the drop off - we don't have the sample
+                                            new SequentialCommandGroup(
+                                                    new IntakeOffCommand(intakeSubsystem),
+                                                    new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
+                                            ),
+                                            () -> true // intakeSubsystem.hasItemInIntake()
+                                    )
+                            ),
+
+                            new ParallelCommandGroup(
+
+                                    new ActionCommand(park, new ArraySet<>()),
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
+                            ),
+                            new AscentOpenHooksCommand(ascentSubsystem)
+
+/*
                             new ParallelCommandGroup(
                                     new SequentialCommandGroup(
                                             new IntakeSlidesOutCommand(intakeSubsystem),
@@ -314,14 +323,17 @@ public class BasketAuto  extends CommandOpMode {
                                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
                                     ),
                                     new SequentialCommandGroup(
-                                            new WaitCommand(500), //time to settle in
+                                            new WaitCommand(1000), //time to settle in
                                             new ActionCommand(thirdSampleSlowMoveIn, new ArraySet<>())
                                     )
                             ),
                             new WaitCommand(500), //TODO - use the sensor
                             new ConditionalCommand(
                                     new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new InstantCommand(), //just retracting with no sample - do nothing
+                                    new SequentialCommandGroup( //don't have anything in the intake
+                                            new IntakeOffCommand(intakeSubsystem),
+                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
+                                    ),
                                     () -> intakeSubsystem.hasItemInIntake()
                             ),
                             new ActionCommand(deliverThirdSample, new ArraySet<>()),
@@ -330,7 +342,7 @@ public class BasketAuto  extends CommandOpMode {
                                     new CloseGripplerCommand(transferSubsystem),
                                     new WaitCommand(200),
                                     new ParallelCommandGroup(
-                                            //new SlidesHighBasketCommand(slidesSubsystem),
+                                            //new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState ),
                                             new TransferFlipCommand(transferSubsystem)
                                     )
                             ),
@@ -338,12 +350,12 @@ public class BasketAuto  extends CommandOpMode {
                             new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
                             new OpenGripplerCommand(transferSubsystem),
                             new WaitCommand(500),
-                            //new SlidesStowCommand(slidesSubsystem),
+                            //new DeliveryResetCommandGroup
                             new TransferStowCommand(transferSubsystem),
 
+*/
 
-
-                            new ActionCommand(park, new ArraySet<>())
+                          //  new ActionCommand(park, new ArraySet<>())
 
                     )
                 )

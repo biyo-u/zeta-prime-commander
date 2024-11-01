@@ -113,6 +113,11 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public boolean hasItemInIntake(){
+        telemetry.addData("IntakeColour", getDesiredIntakeColour());
+        telemetry.addData("Desired", getDesiredIntakeColour());
+        telemetry.addData("Result", getCurrentIntakeColour() == getDesiredIntakeColour());
+        telemetry.update();
+
         return getCurrentIntakeColour() == getDesiredIntakeColour();
 
     }
@@ -188,6 +193,7 @@ public class IntakeSubsystem extends SubsystemBase {
         NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
+        //telemetry.addData("HSV", hsvValues[0]);
 
         if(hsvValues[0] > 200) {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
@@ -202,6 +208,8 @@ public class IntakeSubsystem extends SubsystemBase {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
                 return SampleColour.BLUE_OR_NEUTRAL;
             }
+            //telemetry.addData("FOUND", "NEUTRAL");
+            //telemetry.update();
             return SampleColour.NEUTRAL;
         }
         if(hsvValues[0] >= 20) {

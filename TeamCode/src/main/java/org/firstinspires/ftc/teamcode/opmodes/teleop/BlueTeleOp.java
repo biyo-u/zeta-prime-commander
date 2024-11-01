@@ -12,7 +12,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.AscentCloseHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentLowRungCommand;
+import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentStowCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
@@ -87,14 +89,14 @@ public class BlueTeleOp extends CommandOpMode {
         m_drive.setDefaultCommand(m_driveCommand);
 
         //get rid of this when not needed
-        schedule(new RunCommand(() -> {
+        /*schedule(new RunCommand(() -> {
                 telemetry.addData("Slides:", slidesSubsystem.getCurrentSlidePos());
                 telemetry.addData("Magnet", transferSubsystem.IsTransferClosed());
                 telemetry.addData("ML", ascentSubsystem.getLeftMotorPos());
                 telemetry.addData("MR", ascentSubsystem.getRightMotorPos());
                 telemetry.update();
         }
-        ));
+        ));*/
 
 
         //Intake
@@ -115,9 +117,9 @@ public class BlueTeleOp extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         new IntakePivotUpCommand(intakeSubsystem,robotState),
                                         new WaitCommand(300),
-                                        new IntakeSlidesInCommand(intakeSubsystem,transferSubsystem)
+                                        new IntakeSlidesInCommand(intakeSubsystem,transferSubsystem).withTimeout(500)
                                 ),
-                                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
+                                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500),
                                 () -> robotState.pivotPosition == RobotStateSubsystem.PivotState.LOW
                         ),
 
@@ -209,6 +211,7 @@ public class BlueTeleOp extends CommandOpMode {
 
                 new ConditionalCommand(
                     new SequentialCommandGroup(
+                            new IntakePivotDownCommand(intakeSubsystem, robotState),
                             new CloseGripplerCommand(transferSubsystem),
                             new WaitCommand(200),
                             new ParallelCommandGroup(
@@ -306,18 +309,27 @@ public class BlueTeleOp extends CommandOpMode {
 
         //reset the hooks - not ready for climb
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(()-> {
-                    ascentSubsystem.ascentOpenHooks();
-                })
+                new SequentialCommandGroup(
+                        new InstantCommand(()->{
+                            telemetry.addData("Hooks", "Up");
+                            telemetry.update();
+                        }),
+                    new AscentOpenHooksCommand(ascentSubsystem)
+
+                )
+
         );
 
         //operator - lift slides and put hooks into position.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new SequentialCommandGroup(
                         new SlidesLowBasketCommand(slidesSubsystem),
-                    new InstantCommand(()-> {
-                        ascentSubsystem.ascentCloseHooks();
-                    })
+                        new InstantCommand(()->{
+                            telemetry.addData("Hooks", "Closed");
+                            telemetry.update();
+                        }),
+                    new AscentCloseHooksCommand(ascentSubsystem)
+
                 )
         );
 
