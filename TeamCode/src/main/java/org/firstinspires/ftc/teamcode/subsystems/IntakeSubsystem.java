@@ -29,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Define variables
     private double intakeSlidesInPosition = 0.5;
-    private double intakeSlidesOutPosition = 0.02;
+    private double intakeSlidesOutPosition = 0.1;
 
     private double intakePivotUpPosition = 0;
     private double intakePivotDownPosition = 0.58;
@@ -109,7 +109,12 @@ public class IntakeSubsystem extends SubsystemBase {
     public void IncrSlides(){
         double currentPos = getIntakeSlidePosition();
         //slides must be decremented
-        setIntakeSlidePosition(currentPos - 0.01);
+        double newPos = currentPos - 0.01;
+
+        if(newPos < intakeSlidesOutPosition){
+            newPos = intakeSlidesOutPosition;
+        }
+        setIntakeSlidePosition(newPos);
     }
 
     public boolean hasItemInIntake(){

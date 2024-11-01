@@ -60,4 +60,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 
     }
+
+    public void setPose(Pose2d currentPose){
+        drive.pose = currentPose;
+    }
 }

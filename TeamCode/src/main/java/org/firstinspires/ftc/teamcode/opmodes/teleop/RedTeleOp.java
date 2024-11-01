@@ -12,7 +12,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.commands.AscentCloseHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentLowRungCommand;
+import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentStowCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
@@ -38,14 +40,13 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
 import java.util.function.BooleanSupplier;
 
 @TeleOp(name = "Red TeleOp")
 public class RedTeleOp extends CommandOpMode {
-// rightn trigger: basket
-    // left trigger slides out and intake
-    // right bumper speciman chamber
+
     private DriveSubsystem m_drive;
     private DefaultDrive m_driveCommand;
     private IntakeSubsystem intakeSubsystem;
@@ -86,15 +87,21 @@ public class RedTeleOp extends CommandOpMode {
         register(m_drive);
         m_drive.setDefaultCommand(m_driveCommand);
 
+        //reset the pose from the auto - only if added.
+
+        if(PoseStorage.currentPose != null){
+            m_drive.setPose(PoseStorage.currentPose);
+        }
+
         //get rid of this when not needed
-        schedule(new RunCommand(() -> {
+        /*schedule(new RunCommand(() -> {
                 telemetry.addData("Slides:", slidesSubsystem.getCurrentSlidePos());
                 telemetry.addData("Magnet", transferSubsystem.IsTransferClosed());
                 telemetry.addData("ML", ascentSubsystem.getLeftMotorPos());
                 telemetry.addData("MR", ascentSubsystem.getRightMotorPos());
                 telemetry.update();
         }
-        ));
+        ));*/
 
 
         //Intake
@@ -115,9 +122,9 @@ public class RedTeleOp extends CommandOpMode {
                                 new SequentialCommandGroup(
                                         new IntakePivotUpCommand(intakeSubsystem,robotState),
                                         new WaitCommand(300),
-                                        new IntakeSlidesInCommand(intakeSubsystem,transferSubsystem)
+                                        new IntakeSlidesInCommand(intakeSubsystem,transferSubsystem).withTimeout(500)
                                 ),
-                                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem),
+                                new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500),
                                 () -> robotState.pivotPosition == RobotStateSubsystem.PivotState.LOW
                         ),
 
@@ -129,7 +136,7 @@ public class RedTeleOp extends CommandOpMode {
                         new InstantCommand(()-> {
                             driveSpeed = 1;
                         })
-                    )
+                )
 
         );
 
@@ -191,7 +198,7 @@ public class RedTeleOp extends CommandOpMode {
         ).whenInactive(
                 //retract and stage if we have the sample
                 new SequentialCommandGroup(
-                    new IntakeOffCommand(intakeSubsystem),
+                        new IntakeOffCommand(intakeSubsystem),
                         new InstantCommand(()-> {
                             driveSpeed = 1;
                         }),
@@ -208,18 +215,19 @@ public class RedTeleOp extends CommandOpMode {
         m_driveDriver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
 
                 new ConditionalCommand(
-                    new SequentialCommandGroup(
-                            new CloseGripplerCommand(transferSubsystem),
-                            new WaitCommand(200),
-                            new ParallelCommandGroup(
-                                    new SlidesHighBasketCommand(slidesSubsystem),
-                                    new TransferFlipCommand(transferSubsystem)
-                            ),
-                            new InstantCommand(()-> {
-                                driveSpeed = 0.5;
-                                robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
-                            })
-                    ),
+                        new SequentialCommandGroup(
+                                new IntakePivotDownCommand(intakeSubsystem, robotState),
+                                new CloseGripplerCommand(transferSubsystem),
+                                new WaitCommand(200),
+                                new ParallelCommandGroup(
+                                        new SlidesHighBasketCommand(slidesSubsystem),
+                                        new TransferFlipCommand(transferSubsystem)
+                                ),
+                                new InstantCommand(()-> {
+                                    driveSpeed = 0.5;
+                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
+                                })
+                        ),
                         new SequentialCommandGroup(
                                 new CloseGripplerCommand(transferSubsystem),
                                 new WaitCommand(200),
@@ -281,17 +289,17 @@ public class RedTeleOp extends CommandOpMode {
 
         //outtake the sample
         m_driveDriver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
-            new OuttakeOnCommand(intakeSubsystem)
+                new OuttakeOnCommand(intakeSubsystem)
         ).whenReleased(
                 new IntakeOffCommand(intakeSubsystem)
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(
-                new DesiredColourBlueCommand(intakeSubsystem)
+                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED_OR_NEUTRAL);})
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);})
+                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED);})
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
@@ -306,18 +314,27 @@ public class RedTeleOp extends CommandOpMode {
 
         //reset the hooks - not ready for climb
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-                new InstantCommand(()-> {
-                    ascentSubsystem.ascentOpenHooks();
-                })
+                new SequentialCommandGroup(
+                        new InstantCommand(()->{
+                            telemetry.addData("Hooks", "Up");
+                            telemetry.update();
+                        }),
+                        new AscentOpenHooksCommand(ascentSubsystem)
+
+                )
+
         );
 
         //operator - lift slides and put hooks into position.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
                 new SequentialCommandGroup(
                         new SlidesLowBasketCommand(slidesSubsystem),
-                    new InstantCommand(()-> {
-                        ascentSubsystem.ascentCloseHooks();
-                    })
+                        new InstantCommand(()->{
+                            telemetry.addData("Hooks", "Closed");
+                            telemetry.update();
+                        }),
+                        new AscentCloseHooksCommand(ascentSubsystem)
+
                 )
         );
 
@@ -333,7 +350,7 @@ public class RedTeleOp extends CommandOpMode {
 
         //reset the hang
         m_driveOperator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-               new AscentStowCommand(ascentSubsystem)
+                new AscentStowCommand(ascentSubsystem)
         );
 
 

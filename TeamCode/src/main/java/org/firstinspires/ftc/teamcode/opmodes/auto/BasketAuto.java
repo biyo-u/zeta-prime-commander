@@ -44,6 +44,7 @@ import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
+import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
 @Autonomous(name = "BasketAuto", group = "Autonomous")
 public class BasketAuto  extends CommandOpMode {
@@ -313,7 +314,12 @@ public class BasketAuto  extends CommandOpMode {
                                     new ActionCommand(park, new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
-                            new AscentOpenHooksCommand(ascentSubsystem)
+                            new AscentOpenHooksCommand(ascentSubsystem),
+                            new InstantCommand(()->{
+
+                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(-270));
+
+                            })
 
 /*
                             new ParallelCommandGroup(

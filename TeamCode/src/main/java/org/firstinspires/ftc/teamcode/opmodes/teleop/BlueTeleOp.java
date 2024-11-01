@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -40,14 +41,13 @@ import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
 import java.util.function.BooleanSupplier;
 
 @TeleOp(name = "Blue TeleOp")
 public class BlueTeleOp extends CommandOpMode {
-// rightn trigger: basket
-    // left trigger slides out and intake
-    // right bumper speciman chamber
+
     private DriveSubsystem m_drive;
     private DefaultDrive m_driveCommand;
     private IntakeSubsystem intakeSubsystem;
@@ -87,6 +87,14 @@ public class BlueTeleOp extends CommandOpMode {
 
         register(m_drive);
         m_drive.setDefaultCommand(m_driveCommand);
+
+        //reset the pose from the auto - only if added.
+
+        if(PoseStorage.currentPose != null){
+            m_drive.setPose(PoseStorage.currentPose);
+            //we've used it up now, clear it
+           PoseStorage.currentPose = null;
+        }
 
         //get rid of this when not needed
         /*schedule(new RunCommand(() -> {
