@@ -19,17 +19,18 @@ public class AscentSubsystem extends SubsystemBase {
     // Define variables
     private int ascentStowedPosition = 0;
     private int ascentLowRungPreparedPosition = 0;
-    private int ascentLowRungPosition = 6400;
+    private int ascentLowRungPosition = 6650; // Distance 274mm C2C  (old 6400)
     private int ascentHighRungPosition = 0;
     private int ascentFinishedLevel3Position = 0;
 
     private double ascentOpenHookPosition = 0;
-    private double ascentClosedHookPosition = 0.3;
+    private double ascentClosedHookPosition = 0.5;
 
     public AscentSubsystem(final HardwareMap hMap) {
         ascentLeftMotor = hMap.get(DcMotor.class, "ascentLeftMotor");
         ascentRightMotor = hMap.get(DcMotor.class, "ascentRightMotor");
 
+        ascentRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ascentLeftHook = hMap.get(Servo.class, "ascentLeftHook");
         ascentRightHook = hMap.get(Servo.class, "ascentRightHook");
@@ -138,7 +139,7 @@ public class AscentSubsystem extends SubsystemBase {
 
     public void ascentCloseHooks() {
         ascentLeftHook.setPosition(ascentClosedHookPosition);
-        ascentRightHook.setPosition(ascentClosedHookPosition);
+        ascentRightHook.setPosition(ascentClosedHookPosition  + 0.2);
     }
 
     public boolean AreAscentHooksClosed() {

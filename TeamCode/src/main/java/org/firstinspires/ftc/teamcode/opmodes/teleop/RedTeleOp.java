@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -91,6 +92,8 @@ public class RedTeleOp extends CommandOpMode {
 
         if(PoseStorage.currentPose != null){
             m_drive.setPose(PoseStorage.currentPose);
+            //we've used it up now, clear it
+            PoseStorage.currentPose = null;
         }
 
         //get rid of this when not needed
@@ -170,17 +173,30 @@ public class RedTeleOp extends CommandOpMode {
                         })
                 )).whenInactive(
                 new SequentialCommandGroup(
-
-                        new OpenGripplerCommand(transferSubsystem),
-                        new TransferStowCommand(transferSubsystem),
-                        new InstantCommand(()-> {
-                            driveSpeed = 1;
-                        }),
-                        new IntakePivotUpCommand(intakeSubsystem, robotState),
-                        new SlidesStowCommand(slidesSubsystem),
-                        new InstantCommand(()->{
-                            slidesSubsystem.NoPowerSlides();
-                        })
+                        new ConditionalCommand(
+                                //Slam down
+                                new SequentialCommandGroup(
+                                        new OpenGripplerCommand(transferSubsystem),
+                                        new TransferStowCommand(transferSubsystem),
+                                        new InstantCommand(()-> {
+                                            driveSpeed = 1;
+                                        }),
+                                        new IntakePivotUpCommand(intakeSubsystem, robotState),
+                                        new SlidesStowCommand(slidesSubsystem),
+                                        new InstantCommand(()->{
+                                            slidesSubsystem.NoPowerSlides();
+                                        })
+                                ),
+                                //we missed the slam down, lower the transfer to try again.
+                                new SequentialCommandGroup(
+                                        new TransferStowCommand(transferSubsystem),
+                                        new InstantCommand(()-> {
+                                            driveSpeed = 1;
+                                        })
+                                ),
+                                //hold the left trigger down to lower down
+                                () -> m_driveDriver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5
+                        )
                 )
         );
 
@@ -216,7 +232,6 @@ public class RedTeleOp extends CommandOpMode {
 
                 new ConditionalCommand(
                         new SequentialCommandGroup(
-                                new IntakePivotDownCommand(intakeSubsystem, robotState),
                                 new CloseGripplerCommand(transferSubsystem),
                                 new WaitCommand(200),
                                 new ParallelCommandGroup(
@@ -295,11 +310,11 @@ public class RedTeleOp extends CommandOpMode {
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.X).whenPressed(
-                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED_OR_NEUTRAL);})
+                new DesiredColourBlueCommand(intakeSubsystem)
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED);})
+                new InstantCommand(() ->{intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);})
         );
 
         m_driveOperator.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
@@ -341,10 +356,18 @@ public class RedTeleOp extends CommandOpMode {
         //go for the climb - disable the servos to prevent breakage.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() ->{
-                            ascentSubsystem.disableServos();
-                        }),
-                        new AscentLowRungCommand(ascentSubsystem)
+                        new ParallelCommandGroup(
+                                new AscentLowRungCommand(ascentSubsystem),
+                                new SequentialCommandGroup(
+                                        new WaitCommand(150),
+                                        new InstantCommand(() ->{
+                                            ascentSubsystem.disableServos();
+                                        })
+                                )
+                        ),
+                        new WaitCommand(200),
+                        new SlidesStowCommand(slidesSubsystem)
+
                 )
         );
 

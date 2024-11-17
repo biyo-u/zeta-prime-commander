@@ -41,7 +41,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name="Arm", group="Linear OpMode")
-@Disabled
+//@Disabled
 public class ArmTest extends LinearOpMode {
 
     // Declare OpMode members.
@@ -60,7 +60,7 @@ public class ArmTest extends LinearOpMode {
         hookLeft = hardwareMap.get(Servo.class, "ascentLeftHook");
         hookRight = hardwareMap.get(Servo.class, "ascentRightHook");
 
-        slide.setDirection(DcMotorSimple.Direction.REVERSE);
+        slide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //arm.setDirection(DcMotor.Direction.REVERSE);
 

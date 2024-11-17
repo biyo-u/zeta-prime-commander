@@ -4,7 +4,11 @@ import android.graphics.Color;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -24,8 +28,13 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private Servo poopChute;
 
+    private DigitalChannel colorPin0;
+
+    private DigitalChannel colorPin1;
+
+
     // Define the colour sensor
-    private NormalizedColorSensor colourSensor;
+    private RevColorSensorV3 colourSensor;
 
     // Define variables
     private double intakeSlidesInPosition = 0.5;
@@ -58,6 +67,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private boolean isPooping = true;
 
+
     public IntakeSubsystem(final HardwareMap hMap, Telemetry telemetry){
 
         this.telemetry = telemetry;
@@ -70,7 +80,14 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRightSlide = hMap.get(Servo.class, "intakeRightSlide");
         poopChute = hMap.get(Servo.class, "poopChute");
 
-        colourSensor = hMap.get(NormalizedColorSensor.class, "colourSensor");
+        colourSensor = hMap.get(RevColorSensorV3.class, "colourSensor");
+
+        //TODO: Test fast mode
+        ((LynxI2cDeviceSynch) colourSensor.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+
+
+        colorPin0 = hMap.digitalChannel.get("digital0");
+        colorPin1 = hMap.digitalChannel.get("digital1");
 
         intakeLeftPivot.setDirection(Servo.Direction.REVERSE);
 
@@ -194,8 +211,33 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public SampleColour getCurrentIntakeColour(){
         //TODO: add colour detection here.
-        //TODO: cache this for 20 - 40 ms
-        NormalizedRGBA colors = colourSensor.getNormalizedColors();
+
+/*
+        telemetry.addData("Pin0", colorPin0.getState());
+        telemetry.addData("Pin1", colorPin1.getState());
+
+
+        if(colorPin1.getState() && colorPin0.getState()){
+            telemetry.addData("C", "Neutral");
+            telemetry.update();
+            return SampleColour.NEUTRAL;
+        }
+        else if(colorPin1.getState() && !colorPin0.getState()){
+            telemetry.addData("C", "Red");
+            telemetry.update();
+            return SampleColour.RED;
+        }
+        else if(colorPin0.getState() && !colorPin1.getState()){
+            telemetry.addData("C", "Blue");
+            telemetry.update();
+            return SampleColour.BLUE;
+        }else{
+            telemetry.addData("C", "None");
+            telemetry.update();
+            return SampleColour.NONE;
+        }*/
+
+       NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
         //telemetry.addData("HSV", hsvValues[0]);
@@ -264,8 +306,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void colourAwareIntake(){
 
-            telemetry.addData("Desired:", desiredColour);
-            telemetry.update();
+            //telemetry.addData("Desired:", desiredColour);
+            //telemetry.update();
 
             SampleColour currentColour = getCurrentIntakeColour();
 

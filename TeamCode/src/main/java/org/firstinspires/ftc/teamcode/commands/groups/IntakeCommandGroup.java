@@ -42,7 +42,7 @@ public class IntakeCommandGroup extends SequentialCommandGroup {
                         new IntakePivotUpCommand(intakeSubsystem, robotState),
                         new MiddleGripplerRotationCommand(transferSubsystem)
                 ),
-                new PoopChuteCloseCommand(intakeSubsystem),
+                new PoopChuteCloseCommand(intakeSubsystem), //TODO: TEST
                 //new WaitCommand(300), //give the servos time to operate
 
                 new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500),

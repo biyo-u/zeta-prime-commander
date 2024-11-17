@@ -172,19 +172,32 @@ public class BlueTeleOp extends CommandOpMode {
                             driveSpeed = 0.7;
                         })
                 )).whenInactive(
-                new SequentialCommandGroup(
-
-                        new OpenGripplerCommand(transferSubsystem),
-                        new TransferStowCommand(transferSubsystem),
-                        new InstantCommand(()-> {
-                            driveSpeed = 1;
-                        }),
-                        new IntakePivotUpCommand(intakeSubsystem, robotState),
-                        new SlidesStowCommand(slidesSubsystem),
-                        new InstantCommand(()->{
-                            slidesSubsystem.NoPowerSlides();
-                        })
-                )
+                    new SequentialCommandGroup(
+                            new ConditionalCommand(
+                                    //Slam down
+                                    new SequentialCommandGroup(
+                                        new OpenGripplerCommand(transferSubsystem),
+                                        new TransferStowCommand(transferSubsystem),
+                                        new InstantCommand(()-> {
+                                            driveSpeed = 1;
+                                        }),
+                                        new IntakePivotUpCommand(intakeSubsystem, robotState),
+                                        new SlidesStowCommand(slidesSubsystem),
+                                        new InstantCommand(()->{
+                                            slidesSubsystem.NoPowerSlides();
+                                        })
+                                    ),
+                                    //we missed the slam down, lower the transfer to try again.
+                                    new SequentialCommandGroup(
+                                            new TransferStowCommand(transferSubsystem),
+                                            new InstantCommand(()-> {
+                                                driveSpeed = 1;
+                                            })
+                                    ),
+                                    //hold the left trigger down to lower down
+                                    () -> m_driveDriver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5
+                            )
+                    )
         );
 
         //intaking
@@ -219,7 +232,6 @@ public class BlueTeleOp extends CommandOpMode {
 
                 new ConditionalCommand(
                     new SequentialCommandGroup(
-                            new IntakePivotDownCommand(intakeSubsystem, robotState),
                             new CloseGripplerCommand(transferSubsystem),
                             new WaitCommand(200),
                             new ParallelCommandGroup(
@@ -344,10 +356,18 @@ public class BlueTeleOp extends CommandOpMode {
         //go for the climb - disable the servos to prevent breakage.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
-                        new InstantCommand(() ->{
-                            ascentSubsystem.disableServos();
-                        }),
-                        new AscentLowRungCommand(ascentSubsystem)
+                       new ParallelCommandGroup(
+                            new AscentLowRungCommand(ascentSubsystem),
+                            new SequentialCommandGroup(
+                               new WaitCommand(150),
+                                new InstantCommand(() ->{
+                                    ascentSubsystem.disableServos();
+                                })
+                            )
+                       ),
+                        new WaitCommand(200),
+                        new SlidesStowCommand(slidesSubsystem)
+
                 )
         );
 
