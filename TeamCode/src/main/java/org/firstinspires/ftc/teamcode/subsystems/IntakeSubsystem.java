@@ -134,6 +134,17 @@ public class IntakeSubsystem extends SubsystemBase {
         setIntakeSlidePosition(newPos);
     }
 
+    public void IncrSlidesFaster(){
+        double currentPos = getIntakeSlidePosition();
+        //slides must be decremented
+        double newPos = currentPos - 0.05;
+
+        if(newPos < intakeSlidesOutPosition){
+            newPos = intakeSlidesOutPosition;
+        }
+        setIntakeSlidePosition(newPos);
+    }
+
     public boolean hasItemInIntake(){
         telemetry.addData("IntakeColour", getDesiredIntakeColour());
         telemetry.addData("Desired", getDesiredIntakeColour());

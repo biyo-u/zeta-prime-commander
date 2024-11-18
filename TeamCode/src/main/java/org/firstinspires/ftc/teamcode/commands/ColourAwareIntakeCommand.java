@@ -32,6 +32,7 @@ public class ColourAwareIntakeCommand extends CommandBase {
     public void execute(){
         //start the colour aware intaking
         if(!pooping) {
+            intakeSubsystem.poopChuteOpen();
             intakeSubsystem.colourAwareIntake();
         }
         if(intakeSubsystem.IsPooping()){

@@ -327,6 +327,15 @@ public class BlueTeleOp extends CommandOpMode {
                 })
         );
 
+        //drop the intake pivot -
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+                new SequentialCommandGroup(
+                    new InstantCommand(intakeSubsystem::colourAwareIntake),
+                    new InstantCommand(intakeSubsystem::IncrSlidesFaster)
+                )
+
+        );
+
         //reset the hooks - not ready for climb
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new SequentialCommandGroup(

@@ -24,7 +24,7 @@ public class TransferSubsystem extends SubsystemBase {
     private double leftGripplerRotation = 0;
     private double rightGripplerRotation = 1;
     private double closedGripplerPosition = 0;
-    private double openGripplerPosition = 0.6;
+    private double openGripplerPosition = 0.5;
 
     public TransferSubsystem(final HardwareMap hMap) {
         armLeftServo = hMap.get(Servo.class, "armLeft");
