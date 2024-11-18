@@ -3,12 +3,8 @@ import androidx.collection.ArraySet;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.VelConstraint;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
@@ -18,20 +14,17 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
-import org.firstinspires.ftc.teamcode.commands.SlidesHighBasketCommand;
 import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
@@ -46,8 +39,8 @@ import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "BasketAuto", group = "Autonomous")
-public class BasketAuto  extends CommandOpMode {
+@Autonomous(name = "BasketAuto Ex", group = "Autonomous")
+public class BasketAutoEx extends CommandOpMode {
 
     Action dropOffPreload;
     Action firstSample;
@@ -62,11 +55,10 @@ public class BasketAuto  extends CommandOpMode {
     Action thirdSample;
     Action thirdSampleSlowMoveIn;
     Action deliverThirdSample;
+
+    Action deliverThirdSampleMoveIn;
     Action park;
 
-    TrajectoryActionBuilder part1;
-
-    TrajectoryActionBuilder part2;
 
     Action pleaseWork;
     IntakeSubsystem intakeSubsystem;
@@ -102,22 +94,22 @@ public class BasketAuto  extends CommandOpMode {
                 .build();
 
         //pose to the first sample
-        Pose2d firstSamplePose = new Pose2d(-26,-59,Math.toRadians(-240));
+        Pose2d firstSamplePose = new Pose2d(-35,-60,Math.toRadians(-260));
 
         firstSample = drive.actionBuilder(dropOffPose)
-                .setTangent(Math.toRadians(-131))
-                .splineToLinearHeading(firstSamplePose,Math.toRadians(-131))
+                .setTangent(Math.toRadians(-260))
+                .splineToLinearHeading(firstSamplePose,Math.toRadians(-260))
                 .build();
 
         //pose after the slow move in
-        Pose2d slowMoveForward = new Pose2d(-26, -49, Math.toRadians(-241));
+        Pose2d slowMoveForward = new Pose2d(-35, -54, Math.toRadians(-260));
 
         firstSampleSlowMoveIn = drive.actionBuilder(firstSamplePose)
-                .setTangent(Math.toRadians(-241))
-                .splineToLinearHeading(slowMoveForward,Math.toRadians(-241), new TranslationalVelConstraint(10))
+                .setTangent(Math.toRadians(-260))
+                .splineToLinearHeading(slowMoveForward,Math.toRadians(-260), new TranslationalVelConstraint(4))
                  .build();
 
-        Pose2d deliverPose = new Pose2d(-45,-58,Math.toRadians(-315));
+        Pose2d deliverPose = new Pose2d(-43,-58,Math.toRadians(-315));
 
         deliverFirstSample = drive.actionBuilder(slowMoveForward)
                 //pick up the first sample
@@ -133,14 +125,14 @@ public class BasketAuto  extends CommandOpMode {
 
         //Y -64 is on the wall
 
-        Pose2d secondSamplePose = new Pose2d(-32,-60,Math.toRadians(-241));
+        Pose2d secondSamplePose = new Pose2d(-46,-58,Math.toRadians(100));
 
         secondSample = drive.actionBuilder(deliverPose)
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(secondSamplePose,Math.toRadians(90))
                 .build();
 
-        Pose2d secondSampleMoveInPose = new Pose2d(-37,-50,Math.toRadians(-241));
+        Pose2d secondSampleMoveInPose = new Pose2d(-46,-50,Math.toRadians(100));
 
 
         secondSampleSlowMoveIn = drive.actionBuilder(secondSamplePose)
@@ -158,18 +150,30 @@ public class BasketAuto  extends CommandOpMode {
                 .splineToLinearHeading(deliverFirstSampleMoveInPose, Math.toRadians(-90))
                 .build();
 
-        thirdSample = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-43,-59,Math.toRadians(-242)),Math.toRadians(90))
+        Pose2d thirdSamplePose = new Pose2d(-46,-59,Math.toRadians(-242));
+
+        thirdSample = drive.actionBuilder(deliverFirstSampleMoveInPose)
+                .setTangent(Math.toRadians(103))
+                .splineToLinearHeading(thirdSamplePose,Math.toRadians(103))
                 .build();
 
-        thirdSampleSlowMoveIn = drive.actionBuilder(new Pose2d(-43,-59,Math.toRadians(-242)))
-                .splineToLinearHeading(new Pose2d(-46,-49,Math.toRadians(-242)), Math.toRadians(90), new TranslationalVelConstraint(3))
+        Pose2d thirdSampleMoveInPose = new Pose2d(-49,-43,Math.toRadians(-242));
+
+        thirdSampleSlowMoveIn = drive.actionBuilder(thirdSamplePose)
+                .splineToLinearHeading(thirdSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(6))
                 .build();
+
+        Pose2d deliverThirdMovePose = new Pose2d(-50,-55,Math.toRadians(-315));
 
         deliverThirdSample = drive.actionBuilder(new Pose2d(-46,-49,Math.toRadians(-242)))
                 .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(new Pose2d(-50,-55,Math.toRadians(-315)),Math.toRadians(-90))
+                .splineToLinearHeading(deliverThirdMovePose , Math.toRadians(-315))
+                .build();
+
+        Pose2d deliverThirdSampleMoveInPose = new Pose2d(-48,-61, Math.toRadians(-315));
+
+        deliverThirdSampleMoveIn = drive.actionBuilder(deliverThirdMovePose)
+                .splineToLinearHeading(deliverThirdSampleMoveInPose, Math.toRadians(-90))
                 .build();
 
         park = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
@@ -190,7 +194,7 @@ public class BasketAuto  extends CommandOpMode {
 
                             new WaitCommand(100),
                             new TransferFlipCommand(transferSubsystem),
-                            new WaitCommand(400),
+                            new WaitCommand(500),
                             new SequentialCommandGroup(
 
                                     new OpenGripplerCommand(transferSubsystem),
@@ -205,18 +209,20 @@ public class BasketAuto  extends CommandOpMode {
                             // specimen is now delivered
 
                             new ActionCommand(firstSample, new ArraySet<>()),
-                            new ParallelCommandGroup(
+                            //new ParallelCommandGroup(
                                 new SequentialCommandGroup(
                                         new IntakeSlidesOutCommand(intakeSubsystem),
-                                        new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                        new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
-                                ),
-                                new SequentialCommandGroup(
-                                        new WaitCommand(500), //time to settle in
+                                        new IntakePivotDownCommand(intakeSubsystem, robotState)//,
+                                 ),
+                                new ParallelCommandGroup(
+                                        new SequentialCommandGroup(
+                                                new WaitCommand(300), //give time for the movement to start
+                                                new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+                                        ),
                                         new ActionCommand(firstSampleSlowMoveIn, new ArraySet<>())
-                                )
-                            ),
-                            new WaitCommand(500),
+                                ),
+                            //),
+
                             new ConditionalCommand(
                                     new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
                                     new SequentialCommandGroup(
@@ -234,10 +240,10 @@ public class BasketAuto  extends CommandOpMode {
                                             // do the drop off if we have the sample
                                              new SequentialCommandGroup(
                                                     new ParallelCommandGroup(
-                                                         new SequentialCommandGroup(
+                                                         //new SequentialCommandGroup(
                                                             new ActionCommand(deliverFirstSample, new ArraySet<>()),
                                                             new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
-                                                         )
+                                                         //)
                                                     ),
                                                      new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
                                                      new OpenGripplerCommand(transferSubsystem),
@@ -264,19 +270,21 @@ public class BasketAuto  extends CommandOpMode {
                                     new ActionCommand(secondSample, new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
-                            new ParallelCommandGroup(
+                            new SequentialCommandGroup(
                                     new SequentialCommandGroup(
                                             new IntakeSlidesOutCommand(intakeSubsystem),
-                                            new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
+                                            new IntakePivotDownCommand(intakeSubsystem, robotState)
                                             ),
-                                    new SequentialCommandGroup(
-                                        new WaitCommand(500),
+                                    new ParallelCommandGroup(
+                                        new SequentialCommandGroup(
+                                            new WaitCommand(300),
+                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+                                        ),
                                         new ActionCommand(secondSampleSlowMoveIn, new ArraySet<>())
                                     )
 
                             ),
-                            new WaitCommand(500),
+
                             new ConditionalCommand(
                                     new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
                                     new SequentialCommandGroup( //don't have anything in the intake
@@ -309,57 +317,59 @@ public class BasketAuto  extends CommandOpMode {
                                     )
                             ),
 
+
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(park, new ArraySet<>()),
+                                    new ActionCommand(thirdSample, new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
-                            new AscentOpenHooksCommand(ascentSubsystem),
-                            new InstantCommand(()->{
+                            //third sample
 
-                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(-270));
 
-                            })
-
-/*
                             new ParallelCommandGroup(
                                     new SequentialCommandGroup(
                                             new IntakeSlidesOutCommand(intakeSubsystem),
                                             new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(3000)
+                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                     ),
-                                    new SequentialCommandGroup(
-                                            new WaitCommand(1000), //time to settle in
+                                    //new SequentialCommandGroup(
+                                    //        new WaitCommand(300), //time to settle in
                                             new ActionCommand(thirdSampleSlowMoveIn, new ArraySet<>())
-                                    )
+                                    //)
                             ),
-                            new WaitCommand(500), //TODO - use the sensor
+
                             new ConditionalCommand(
                                     new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
                                     new SequentialCommandGroup( //don't have anything in the intake
                                             new IntakeOffCommand(intakeSubsystem),
                                             new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
                                     ),
-                                    () -> intakeSubsystem.hasItemInIntake()
+                                    () -> true //intakeSubsystem.hasItemInIntake()
                             ),
-                            new ActionCommand(deliverThirdSample, new ArraySet<>()),
 
                             new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
-                                    new WaitCommand(200),
                                     new ParallelCommandGroup(
-                                            //new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState ),
-                                            new TransferFlipCommand(transferSubsystem)
-                                    )
+                                            new ActionCommand(deliverThirdSample, new ArraySet<>()),
+                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                    ),
+                                    new ActionCommand(deliverThirdSampleMoveIn, new ArraySet<>()),
+                                    new OpenGripplerCommand(transferSubsystem),
+                                    new WaitCommand(250)
                             ),
 
-                            new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
-                            new OpenGripplerCommand(transferSubsystem),
-                            new WaitCommand(500),
-                            //new DeliveryResetCommandGroup
-                            new TransferStowCommand(transferSubsystem),
 
-*/
+                            new ParallelCommandGroup(
+
+                                    new ActionCommand(park, new ArraySet<>()),
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+                                    new AscentOpenHooksCommand(ascentSubsystem)
+                            ),
+
+                            new InstantCommand(()->{
+
+                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(-270));
+
+                            })
 
                           //  new ActionCommand(park, new ArraySet<>())
 

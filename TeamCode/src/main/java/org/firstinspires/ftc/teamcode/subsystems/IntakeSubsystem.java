@@ -4,11 +4,17 @@ import android.graphics.Color;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -22,15 +28,20 @@ public class IntakeSubsystem extends SubsystemBase {
 
     private Servo poopChute;
 
+    private DigitalChannel colorPin0;
+
+    private DigitalChannel colorPin1;
+
+
     // Define the colour sensor
-    private NormalizedColorSensor colourSensor;
+    private RevColorSensorV3 colourSensor;
 
     // Define variables
     private double intakeSlidesInPosition = 0.5;
-    private double intakeSlidesOutPosition = 0;
+    private double intakeSlidesOutPosition = 0.1;
 
     private double intakePivotUpPosition = 0;
-    private double intakePivotDownPosition = 0.5;
+    private double intakePivotDownPosition = 0.58;
 
     private double intakePoopOpen = 0.5;
 
@@ -52,7 +63,15 @@ public class IntakeSubsystem extends SubsystemBase {
         BLUE_OR_NEUTRAL
     }
 
-    public IntakeSubsystem(final HardwareMap hMap){
+    private Telemetry telemetry;
+
+    private boolean isPooping = true;
+
+
+    public IntakeSubsystem(final HardwareMap hMap, Telemetry telemetry){
+
+        this.telemetry = telemetry;
+
         intakeMotor = hMap.get(DcMotor.class, "intakeMotor");
 
         intakeLeftPivot = hMap.get(Servo.class, "pivotLeftIntake");
@@ -61,7 +80,14 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRightSlide = hMap.get(Servo.class, "intakeRightSlide");
         poopChute = hMap.get(Servo.class, "poopChute");
 
-        colourSensor = hMap.get(NormalizedColorSensor.class, "colourSensor");
+        colourSensor = hMap.get(RevColorSensorV3.class, "colourSensor");
+
+        //TODO: Test fast mode
+        ((LynxI2cDeviceSynch) colourSensor.getDeviceClient()).setBusSpeed(LynxI2cDeviceSynch.BusSpeed.FAST_400K);
+
+
+        colorPin0 = hMap.digitalChannel.get("digital0");
+        colorPin1 = hMap.digitalChannel.get("digital1");
 
         intakeLeftPivot.setDirection(Servo.Direction.REVERSE);
 
@@ -69,6 +95,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         intakePivotUp();
         intakeSlidesIn();
+        poopChuteClose();
 
     }
 
@@ -86,10 +113,46 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeMotor.setPower(-1);
     }
 
+    public void slowIntake(){
+        intakeMotor.setPower(0.3);
+    }
+
     public void intakeSlidesIn() {
         //Brings the slides in
         intakeLeftSlide.setPosition(intakeSlidesInPosition);
         intakeRightSlide.setPosition(intakeSlidesInPosition);
+    }
+
+    public void IncrSlides(){
+        double currentPos = getIntakeSlidePosition();
+        //slides must be decremented
+        double newPos = currentPos - 0.01;
+
+        if(newPos < intakeSlidesOutPosition){
+            newPos = intakeSlidesOutPosition;
+        }
+        setIntakeSlidePosition(newPos);
+    }
+
+    public void IncrSlidesFaster(){
+        double currentPos = getIntakeSlidePosition();
+        //slides must be decremented
+        double newPos = currentPos - 0.05;
+
+        if(newPos < intakeSlidesOutPosition){
+            newPos = intakeSlidesOutPosition;
+        }
+        setIntakeSlidePosition(newPos);
+    }
+
+    public boolean hasItemInIntake(){
+        telemetry.addData("IntakeColour", getDesiredIntakeColour());
+        telemetry.addData("Desired", getDesiredIntakeColour());
+        telemetry.addData("Result", getCurrentIntakeColour() == getDesiredIntakeColour());
+        telemetry.update();
+
+        return getCurrentIntakeColour() == getDesiredIntakeColour();
+
     }
 
     public boolean AreIntakeSlidesIn() {
@@ -100,6 +163,23 @@ public class IntakeSubsystem extends SubsystemBase {
         //Brings the slides out
         intakeLeftSlide.setPosition(intakeSlidesOutPosition);
         intakeRightSlide.setPosition(intakeSlidesOutPosition);
+    }
+
+    public void SetPoopMode(boolean mode){
+        isPooping = mode;
+    }
+
+    public boolean IsPooping(){
+        return isPooping;
+    }
+
+    public double getIntakeSlidePosition(){
+        return intakeLeftSlide.getPosition();
+    }
+
+    public void setIntakeSlidePosition(double amount) {
+        intakeLeftSlide.setPosition(amount);
+        intakeRightSlide.setPosition(amount);
     }
 
     public boolean AreIntakeSlidesOut() {
@@ -142,23 +222,66 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public SampleColour getCurrentIntakeColour(){
         //TODO: add colour detection here.
-        //TODO: cache this for 20 - 40 ms
-        NormalizedRGBA colors = colourSensor.getNormalizedColors();
+
+/*
+        telemetry.addData("Pin0", colorPin0.getState());
+        telemetry.addData("Pin1", colorPin1.getState());
+
+
+        if(colorPin1.getState() && colorPin0.getState()){
+            telemetry.addData("C", "Neutral");
+            telemetry.update();
+            return SampleColour.NEUTRAL;
+        }
+        else if(colorPin1.getState() && !colorPin0.getState()){
+            telemetry.addData("C", "Red");
+            telemetry.update();
+            return SampleColour.RED;
+        }
+        else if(colorPin0.getState() && !colorPin1.getState()){
+            telemetry.addData("C", "Blue");
+            telemetry.update();
+            return SampleColour.BLUE;
+        }else{
+            telemetry.addData("C", "None");
+            telemetry.update();
+            return SampleColour.NONE;
+        }*/
+
+       NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
+        //telemetry.addData("HSV", hsvValues[0]);
+
         if(hsvValues[0] > 200) {
+            if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
+                return SampleColour.BLUE_OR_NEUTRAL;
+            }
             return SampleColour.BLUE;
         }
         if(hsvValues[0] >= 70 && hsvValues[0] <=100) {
+            if(desiredColour == SampleColour.RED_OR_NEUTRAL){
+                return SampleColour.RED_OR_NEUTRAL;
+            }
+            if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
+                return SampleColour.BLUE_OR_NEUTRAL;
+            }
+            //telemetry.addData("FOUND", "NEUTRAL");
+            //telemetry.update();
             return SampleColour.NEUTRAL;
         }
         if(hsvValues[0] >= 20) {
+            if(desiredColour == SampleColour.RED_OR_NEUTRAL){
+                return SampleColour.RED_OR_NEUTRAL;
+            }
             return SampleColour.RED;
         }
+
         return SampleColour.NONE;
     }
 
     public void setDesiredColourBlue() {
+
         desiredColour = SampleColour.BLUE;
     }
 
@@ -166,7 +289,12 @@ public class IntakeSubsystem extends SubsystemBase {
         return true;
     }
 
+    public void setDesiredColour(SampleColour colour){
+        desiredColour = colour;
+    }
     public void setDesiredColourRed() {
+
+
         desiredColour = SampleColour.RED;
     }
 
@@ -182,14 +310,33 @@ public class IntakeSubsystem extends SubsystemBase {
         return true;
     }
 
+    public SampleColour getDesiredIntakeColour(){
+        return  desiredColour;
+    }
 
 
     public void colourAwareIntake(){
 
-            if (getCurrentIntakeColour() == SampleColour.NONE) {
+            //telemetry.addData("Desired:", desiredColour);
+            //telemetry.update();
+
+            SampleColour currentColour = getCurrentIntakeColour();
+
+            if (currentColour == SampleColour.NONE) {
+                poopChuteOpen();
                 this.Intake();
-            } else if(getCurrentIntakeColour() != desiredColour){
-                this.Outtake();
+            }
+            else if(desiredColour == SampleColour.BLUE_OR_NEUTRAL && (currentColour == SampleColour.BLUE || currentColour == SampleColour.NEUTRAL)){
+                this.IntakeOff();
+            }
+            else if(desiredColour == SampleColour.RED_OR_NEUTRAL && (currentColour == SampleColour.RED || currentColour == SampleColour.NEUTRAL)){
+                this.IntakeOff();
+            }
+            else if(getCurrentIntakeColour() != desiredColour){
+                    if(!IsPooping()) {
+                        this.Outtake();
+                    }
+
             }else {
 
                 this.IntakeOff();

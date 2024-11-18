@@ -1,33 +1,36 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 
-public class IntakePivotUpCommand extends CommandBase {
+public class AutoOnlyIntakeCommand extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final IntakeSubsystem intakeSubsystem;
-    private final RobotStateSubsystem robotState;
+
+    private ElapsedTime timer;
+
+    private boolean pooping = false;
 
 
-    public IntakePivotUpCommand(IntakeSubsystem subsystem, RobotStateSubsystem state) {
+    public AutoOnlyIntakeCommand(IntakeSubsystem subsystem) {
         intakeSubsystem = subsystem;
-        robotState = state;
+        timer = new ElapsedTime();
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
-        //turn outtake on
-        intakeSubsystem.intakePivotUp();
-        robotState.pivotPosition = RobotStateSubsystem.PivotState.HIGH;
+
     }
+
 
     @Override
     public boolean isFinished() {
-        return intakeSubsystem.IsIntakePivotedUp();
+        return intakeSubsystem.getCurrentIntakeColour() == intakeSubsystem.getDesiredIntakeColour();
+
     }
 }

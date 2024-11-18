@@ -4,8 +4,21 @@ import com.arcrobotics.ftclib.command.SubsystemBase;
 
 public class RobotStateSubsystem extends SubsystemBase {
 
+  public enum SlideHeight{
+      STOW,
+      LOW,
+      HIGH
+  }
 
-    public IntakeSubsystem.SampleColour desiredSampleColour(){
-        return IntakeSubsystem.SampleColour.NEUTRAL;
-    }
+  public enum PivotState{
+      LOW,
+      HIGH
+  }
+
+
+  public SlideHeight slidePosition = SlideHeight.STOW;
+
+  public PivotState pivotPosition = PivotState.HIGH;
+
+
 }

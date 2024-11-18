@@ -45,8 +45,8 @@ import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
 import java.util.function.BooleanSupplier;
 
-@TeleOp(name = "Blue TeleOp")
-public class BlueTeleOp extends CommandOpMode {
+@TeleOp(name = "Red TeleOp")
+public class RedTeleOp extends CommandOpMode {
 
     private DriveSubsystem m_drive;
     private DefaultDrive m_driveCommand;
@@ -73,7 +73,7 @@ public class BlueTeleOp extends CommandOpMode {
 
         intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
         //SETUP the starting COLOUR:
-        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.BLUE_OR_NEUTRAL);
+        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.RED_OR_NEUTRAL);
 
         transferSubsystem = new TransferSubsystem(hardwareMap);
 
@@ -93,7 +93,7 @@ public class BlueTeleOp extends CommandOpMode {
         if(PoseStorage.currentPose != null){
             m_drive.setPose(PoseStorage.currentPose);
             //we've used it up now, clear it
-           PoseStorage.currentPose = null;
+            PoseStorage.currentPose = null;
         }
 
         //get rid of this when not needed
@@ -139,7 +139,7 @@ public class BlueTeleOp extends CommandOpMode {
                         new InstantCommand(()-> {
                             driveSpeed = 1;
                         })
-                    )
+                )
 
         );
 
@@ -172,10 +172,10 @@ public class BlueTeleOp extends CommandOpMode {
                             driveSpeed = 0.7;
                         })
                 )).whenInactive(
-                    new SequentialCommandGroup(
-                            new ConditionalCommand(
-                                    //Slam down
-                                    new SequentialCommandGroup(
+                new SequentialCommandGroup(
+                        new ConditionalCommand(
+                                //Slam down
+                                new SequentialCommandGroup(
                                         new OpenGripplerCommand(transferSubsystem),
                                         new TransferStowCommand(transferSubsystem),
                                         new InstantCommand(()-> {
@@ -186,18 +186,18 @@ public class BlueTeleOp extends CommandOpMode {
                                         new InstantCommand(()->{
                                             slidesSubsystem.NoPowerSlides();
                                         })
-                                    ),
-                                    //we missed the slam down, lower the transfer to try again.
-                                    new SequentialCommandGroup(
-                                            new TransferStowCommand(transferSubsystem),
-                                            new InstantCommand(()-> {
-                                                driveSpeed = 1;
-                                            })
-                                    ),
-                                    //hold the left trigger down to lower down
-                                    () -> m_driveDriver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5
-                            )
-                    )
+                                ),
+                                //we missed the slam down, lower the transfer to try again.
+                                new SequentialCommandGroup(
+                                        new TransferStowCommand(transferSubsystem),
+                                        new InstantCommand(()-> {
+                                            driveSpeed = 1;
+                                        })
+                                ),
+                                //hold the left trigger down to lower down
+                                () -> m_driveDriver.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) < 0.5
+                        )
+                )
         );
 
         //intaking
@@ -214,7 +214,7 @@ public class BlueTeleOp extends CommandOpMode {
         ).whenInactive(
                 //retract and stage if we have the sample
                 new SequentialCommandGroup(
-                    new IntakeOffCommand(intakeSubsystem),
+                        new IntakeOffCommand(intakeSubsystem),
                         new InstantCommand(()-> {
                             driveSpeed = 1;
                         }),
@@ -231,18 +231,18 @@ public class BlueTeleOp extends CommandOpMode {
         m_driveDriver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
 
                 new ConditionalCommand(
-                    new SequentialCommandGroup(
-                            new CloseGripplerCommand(transferSubsystem),
-                            new WaitCommand(200),
-                            new ParallelCommandGroup(
-                                    new SlidesHighBasketCommand(slidesSubsystem),
-                                    new TransferFlipCommand(transferSubsystem)
-                            ),
-                            new InstantCommand(()-> {
-                                driveSpeed = 0.5;
-                                robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
-                            })
-                    ),
+                        new SequentialCommandGroup(
+                                new CloseGripplerCommand(transferSubsystem),
+                                new WaitCommand(200),
+                                new ParallelCommandGroup(
+                                        new SlidesHighBasketCommand(slidesSubsystem),
+                                        new TransferFlipCommand(transferSubsystem)
+                                ),
+                                new InstantCommand(()-> {
+                                    driveSpeed = 0.5;
+                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
+                                })
+                        ),
                         new SequentialCommandGroup(
                                 new CloseGripplerCommand(transferSubsystem),
                                 new WaitCommand(200),
@@ -304,7 +304,7 @@ public class BlueTeleOp extends CommandOpMode {
 
         //outtake the sample
         m_driveDriver.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
-            new OuttakeOnCommand(intakeSubsystem)
+                new OuttakeOnCommand(intakeSubsystem)
         ).whenReleased(
                 new IntakeOffCommand(intakeSubsystem)
         );
@@ -330,8 +330,8 @@ public class BlueTeleOp extends CommandOpMode {
         //drop the intake pivot -
         m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
                 new SequentialCommandGroup(
-                    new InstantCommand(intakeSubsystem::colourAwareIntake),
-                    new InstantCommand(intakeSubsystem::IncrSlidesFaster)
+                        new InstantCommand(intakeSubsystem::colourAwareIntake),
+                        new InstantCommand(intakeSubsystem::IncrSlidesFaster)
                 )
 
         );
@@ -343,7 +343,7 @@ public class BlueTeleOp extends CommandOpMode {
                             telemetry.addData("Hooks", "Up");
                             telemetry.update();
                         }),
-                    new AscentOpenHooksCommand(ascentSubsystem)
+                        new AscentOpenHooksCommand(ascentSubsystem)
 
                 )
 
@@ -357,7 +357,7 @@ public class BlueTeleOp extends CommandOpMode {
                             telemetry.addData("Hooks", "Closed");
                             telemetry.update();
                         }),
-                    new AscentCloseHooksCommand(ascentSubsystem)
+                        new AscentCloseHooksCommand(ascentSubsystem)
 
                 )
         );
@@ -365,15 +365,15 @@ public class BlueTeleOp extends CommandOpMode {
         //go for the climb - disable the servos to prevent breakage.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
-                       new ParallelCommandGroup(
-                            new AscentLowRungCommand(ascentSubsystem),
-                            new SequentialCommandGroup(
-                               new WaitCommand(150),
-                                new InstantCommand(() ->{
-                                    ascentSubsystem.disableServos();
-                                })
-                            )
-                       ),
+                        new ParallelCommandGroup(
+                                new AscentLowRungCommand(ascentSubsystem),
+                                new SequentialCommandGroup(
+                                        new WaitCommand(150),
+                                        new InstantCommand(() ->{
+                                            ascentSubsystem.disableServos();
+                                        })
+                                )
+                        ),
                         new WaitCommand(200),
                         new SlidesStowCommand(slidesSubsystem)
 
@@ -382,7 +382,7 @@ public class BlueTeleOp extends CommandOpMode {
 
         //reset the hang
         m_driveOperator.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(
-               new AscentStowCommand(ascentSubsystem)
+                new AscentStowCommand(ascentSubsystem)
         );
 
 

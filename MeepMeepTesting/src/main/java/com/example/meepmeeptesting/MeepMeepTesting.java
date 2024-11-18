@@ -17,36 +17,7 @@ public class MeepMeepTesting {
                 .setDimensions(18,18)
                 .build();
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-35, -61, Math.toRadians(90)))
-
-                .strafeToConstantHeading(new Vector2d(-47,-44))
-                .waitSeconds(0.25)
-
-                .setTangent(Math.toRadians(236))
-                .splineToLinearHeading(new Pose2d(-53, -53, Math.toRadians(45)), Math.toRadians(236))
-                        .waitSeconds(0.25)
-
-                        .setTangent(Math.toRadians(103))
-                .splineToLinearHeading(new Pose2d(-57, -44, Math.toRadians(90)), Math.toRadians(103))
-                .waitSeconds(0.25)
-
-                .strafeToConstantHeading(new Vector2d(-57, -44))
-                .waitSeconds(0.25)
-
-
-
-                .setTangent(Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(35, -49, Math.toRadians(-45)), Math.toRadians(-135))
-                .waitSeconds(0.25)
-
-                .strafeTo(new Vector2d(12,-37))
-                .waitSeconds(0.25)
-
-                .strafeTo(new Vector2d(35, -49))
-                .waitSeconds(0.25)
-
-                .strafeTo(new Vector2d(39, -53))
-                .waitSeconds(0.25)
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

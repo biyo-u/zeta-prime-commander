@@ -33,24 +33,36 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
 
 @TeleOp(name="Arm", group="Linear OpMode")
-
+//@Disabled
 public class ArmTest extends LinearOpMode {
 
     // Declare OpMode members.
 
     private DcMotor arm = null;
+    private DcMotor slide = null;
 
+    private Servo hookLeft;
+    private Servo hookRight;
 
     @Override
     public void runOpMode() {
-        arm  = hardwareMap.get(DcMotor.class, "arm");
-        arm.setDirection(DcMotor.Direction.REVERSE);
+       // arm  = hardwareMap.get(DcMotor.class, "arm");
+        slide = hardwareMap.get(DcMotor.class,"verticalSlidesMotor");
+
+        hookLeft = hardwareMap.get(Servo.class, "ascentLeftHook");
+        hookRight = hardwareMap.get(Servo.class, "ascentRightHook");
+
+        slide.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        //arm.setDirection(DcMotor.Direction.REVERSE);
 
         // Wait for the game to start (driver presses START)
         waitForStart();
@@ -60,8 +72,18 @@ public class ArmTest extends LinearOpMode {
         while (opModeIsActive()) {
 
            if(gamepad1.a){
-               arm.setPower(1);
+             //  arm.setPower(1);
+               hookLeft.setPosition(1);
+               hookRight.setPosition(1);
            }
+
+            if(gamepad1.b){
+                //  arm.setPower(1);
+                hookLeft.setPosition(0);
+                hookRight.setPosition(0);
+            }
+           telemetry.addData("Slides", slide.getCurrentPosition());
+           telemetry.update();
         }
     }
 }
