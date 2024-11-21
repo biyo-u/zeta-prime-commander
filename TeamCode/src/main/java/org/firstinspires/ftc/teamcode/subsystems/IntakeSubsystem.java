@@ -60,7 +60,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
         RED_OR_NEUTRAL,
 
-        BLUE_OR_NEUTRAL
+        BLUE_OR_NEUTRAL,
+
+        AUTO_ANY
     }
 
     private Telemetry telemetry;
@@ -165,6 +167,11 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRightSlide.setPosition(intakeSlidesOutPosition);
     }
 
+    public void intakeSlidesHalfOut(){
+        intakeLeftSlide.setPosition(intakeSlidesOutPosition / 3);
+        intakeRightSlide.setPosition(intakeSlidesOutPosition / 3);
+    }
+
     public void SetPoopMode(boolean mode){
         isPooping = mode;
     }
@@ -257,6 +264,9 @@ public class IntakeSubsystem extends SubsystemBase {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
                 return SampleColour.BLUE_OR_NEUTRAL;
             }
+            if(desiredColour == SampleColour.AUTO_ANY){
+                return SampleColour.AUTO_ANY;
+            }
             return SampleColour.BLUE;
         }
         if(hsvValues[0] >= 70 && hsvValues[0] <=100) {
@@ -266,6 +276,9 @@ public class IntakeSubsystem extends SubsystemBase {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
                 return SampleColour.BLUE_OR_NEUTRAL;
             }
+            if(desiredColour == SampleColour.AUTO_ANY){
+                return SampleColour.AUTO_ANY;
+            }
             //telemetry.addData("FOUND", "NEUTRAL");
             //telemetry.update();
             return SampleColour.NEUTRAL;
@@ -273,6 +286,9 @@ public class IntakeSubsystem extends SubsystemBase {
         if(hsvValues[0] >= 20) {
             if(desiredColour == SampleColour.RED_OR_NEUTRAL){
                 return SampleColour.RED_OR_NEUTRAL;
+            }
+            if(desiredColour == SampleColour.AUTO_ANY){
+                return SampleColour.AUTO_ANY;
             }
             return SampleColour.RED;
         }
@@ -327,6 +343,9 @@ public class IntakeSubsystem extends SubsystemBase {
                 this.Intake();
             }
             else if(desiredColour == SampleColour.BLUE_OR_NEUTRAL && (currentColour == SampleColour.BLUE || currentColour == SampleColour.NEUTRAL)){
+                this.IntakeOff();
+            }
+            else if(desiredColour == SampleColour.AUTO_ANY && (currentColour == SampleColour.AUTO_ANY)){
                 this.IntakeOff();
             }
             else if(desiredColour == SampleColour.RED_OR_NEUTRAL && (currentColour == SampleColour.RED || currentColour == SampleColour.NEUTRAL)){
