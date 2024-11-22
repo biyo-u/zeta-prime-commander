@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
@@ -40,25 +41,25 @@ import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 import org.firstinspires.ftc.teamcode.utils.PinpointDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "BasketAuto Ex", group = "Autonomous")
-public class BasketAutoEx extends CommandOpMode {
+@Autonomous(name = "BasketAuto PP", group = "Autonomous")
+public class BasketAutoPP extends CommandOpMode {
 
-    Action dropOffPreload;
-    Action firstSample;
+    TrajectoryActionBuilder dropOffPreload;
+    TrajectoryActionBuilder firstSample;
 
-    Action firstSampleSlowMoveIn;
-    Action deliverFirstSample;
-    Action deliverFirstSampleMoveIn;
-    Action secondSample;
-    Action secondSampleSlowMoveIn;
-    Action deliverSecondSample;
-    Action deliverSecondSampleMoveIn;
-    Action thirdSample;
-    Action thirdSampleSlowMoveIn;
-    Action deliverThirdSample;
+    TrajectoryActionBuilder firstSampleSlowMoveIn;
+    TrajectoryActionBuilder deliverFirstSample;
+    TrajectoryActionBuilder deliverFirstSampleMoveIn;
+    TrajectoryActionBuilder secondSample;
+    TrajectoryActionBuilder secondSampleSlowMoveIn;
+    TrajectoryActionBuilder deliverSecondSample;
+    TrajectoryActionBuilder deliverSecondSampleMoveIn;
+    TrajectoryActionBuilder thirdSample;
+    TrajectoryActionBuilder thirdSampleSlowMoveIn;
+    TrajectoryActionBuilder deliverThirdSample;
 
-    Action deliverThirdSampleMoveIn;
-    Action park;
+    TrajectoryActionBuilder deliverThirdSampleMoveIn;
+    TrajectoryActionBuilder park;
 
 
     Action pleaseWork;
@@ -87,7 +88,7 @@ public class BasketAutoEx extends CommandOpMode {
 
 
         // instantiate your MecanumDrive at a particular pose.
-        OTOSDrive drive = new OTOSDrive(hardwareMap,
+        PinpointDrive drive = new PinpointDrive(hardwareMap,
                 new Pose2d(-14.8, -64, Math.toRadians(-90)));
 
         //pose to the submersible wall
@@ -96,95 +97,99 @@ public class BasketAutoEx extends CommandOpMode {
         dropOffPreload = drive.actionBuilder(drive.pose)
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(dropOffPose, Math.toRadians(90))
-                .build();
+                .endTrajectory();
 
-        //pose to the first sample
-        Pose2d firstSamplePose = new Pose2d(-35 + X_OFFSET,-60 + Y_OFFSET,Math.toRadians(-260));
 
-        firstSample = drive.actionBuilder(dropOffPose)
+        firstSample = dropOffPreload.fresh()
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-3.4, -36, Math.toRadians(-90)), Math.toRadians(-90))
+                .setTangent(Math.toRadians(-131))
+                .splineToLinearHeading(new Pose2d(-37,-65,Math.toRadians(-235)),Math.toRadians(-131))
+                .endTrajectory();
+
+
+        //slow move in
+        Pose2d slowMoveForward = new Pose2d(-49 + X_OFFSET, -58 + Y_OFFSET, Math.toRadians(-260));
+
+        firstSampleSlowMoveIn = firstSample.fresh()
                 .setTangent(Math.toRadians(-260))
-                .splineToLinearHeading(firstSamplePose,Math.toRadians(-260))
-                .build();
+                .splineToLinearHeading(slowMoveForward,Math.toRadians(-260), new TranslationalVelConstraint(5))
+                .endTrajectory();
 
-        //pose after the slow move in
-        Pose2d slowMoveForward = new Pose2d(-35 + X_OFFSET, -54 + Y_OFFSET, Math.toRadians(-260));
+        Pose2d deliverPose = new Pose2d(-47 + X_OFFSET,-54 + Y_OFFSET,Math.toRadians(-315));
 
-        firstSampleSlowMoveIn = drive.actionBuilder(firstSamplePose)
-                .setTangent(Math.toRadians(-260))
-                .splineToLinearHeading(slowMoveForward,Math.toRadians(-260), new TranslationalVelConstraint(4))
-                 .build();
-
-        Pose2d deliverPose = new Pose2d(-43 + X_OFFSET,-58 + Y_OFFSET,Math.toRadians(-315));
-
-        deliverFirstSample = drive.actionBuilder(slowMoveForward)
+        deliverFirstSample = firstSampleSlowMoveIn.fresh()
                 //pick up the first sample
                 .setTangent(Math.toRadians(180))
                 .splineToLinearHeading(deliverPose,Math.toRadians(180))
-                .build();
+                .endTrajectory();
 
-        Pose2d deliverFirstSampleMoveInPose = new Pose2d(-48 + X_OFFSET,-61 + Y_OFFSET, Math.toRadians(-315));
+        Pose2d deliverFirstSampleMoveInPose = new Pose2d(-60 + X_OFFSET,-56 + Y_OFFSET, Math.toRadians(-315));
 
-        deliverFirstSampleMoveIn = drive.actionBuilder(deliverPose)
+        deliverFirstSampleMoveIn = deliverFirstSample.fresh()
                 .splineToLinearHeading(deliverFirstSampleMoveInPose, Math.toRadians(-90))
-                .build();
+                .endTrajectory();
 
-        //Y -64 is on the wall
 
-        Pose2d secondSamplePose = new Pose2d(-46 + X_OFFSET,-58 + Y_OFFSET,Math.toRadians(100));
 
-        secondSample = drive.actionBuilder(deliverPose)
+        Pose2d secondSamplePose = new Pose2d(-56 + X_OFFSET,-65 + Y_OFFSET,Math.toRadians(100));
+
+        secondSample = deliverFirstSampleMoveIn.fresh()
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(secondSamplePose,Math.toRadians(90))
-                .build();
+                .endTrajectory();
 
-        Pose2d secondSampleMoveInPose = new Pose2d(-46 + X_OFFSET,-50 + Y_OFFSET,Math.toRadians(100));
+        Pose2d secondSampleMoveInPose = new Pose2d(-55 + X_OFFSET,-58 + Y_OFFSET,Math.toRadians(100));
 
 
-        secondSampleSlowMoveIn = drive.actionBuilder(secondSamplePose)
+        secondSampleSlowMoveIn = secondSample.fresh()
                 .splineToLinearHeading(secondSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(5))
-                .build();
+                .endTrajectory();
 
         Pose2d deliverSecondSamplePose = new Pose2d(-50 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
 
-        deliverSecondSample = drive.actionBuilder(secondSampleMoveInPose)
+        deliverSecondSample = secondSampleSlowMoveIn.fresh()
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(deliverSecondSamplePose,Math.toRadians(-90))
-                .build();
+                .endTrajectory();
 
-        deliverSecondSampleMoveIn = drive.actionBuilder(deliverSecondSamplePose)
-                .splineToLinearHeading(deliverFirstSampleMoveInPose, Math.toRadians(-90))
-                .build();
+        Pose2d deliverSecondSampleMoveInPose = new Pose2d(-62 + X_OFFSET,-58 + Y_OFFSET, Math.toRadians(-315));
 
-        Pose2d thirdSamplePose = new Pose2d(-46 + X_OFFSET,-59 + Y_OFFSET,Math.toRadians(-242));
 
-        thirdSample = drive.actionBuilder(deliverFirstSampleMoveInPose)
+        deliverSecondSampleMoveIn = deliverSecondSample.fresh()
+                .splineToLinearHeading(deliverSecondSampleMoveInPose, Math.toRadians(-90))
+                .endTrajectory();
+
+        Pose2d thirdSamplePose = new Pose2d(-60 + X_OFFSET,-65 + Y_OFFSET,Math.toRadians(-242));
+
+        thirdSample = deliverSecondSampleMoveIn.fresh()
                 .setTangent(Math.toRadians(103))
                 .splineToLinearHeading(thirdSamplePose,Math.toRadians(103))
-                .build();
+                .endTrajectory();
 
-        Pose2d thirdSampleMoveInPose = new Pose2d(-49 + X_OFFSET,-43 + Y_OFFSET,Math.toRadians(-242));
+        Pose2d thirdSampleMoveInPose = new Pose2d(-62 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-242));
 
-        thirdSampleSlowMoveIn = drive.actionBuilder(thirdSamplePose)
+        thirdSampleSlowMoveIn = thirdSample.fresh()
                 .splineToLinearHeading(thirdSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(6))
-                .build();
+                .endTrajectory();
 
         Pose2d deliverThirdMovePose = new Pose2d(-50 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
 
-        deliverThirdSample = drive.actionBuilder(new Pose2d(-46 + X_OFFSET,-49 + Y_OFFSET,Math.toRadians(-242)))
+        deliverThirdSample = thirdSampleSlowMoveIn.fresh()
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(deliverThirdMovePose , Math.toRadians(-315))
-                .build();
+                .endTrajectory();
 
-        Pose2d deliverThirdSampleMoveInPose = new Pose2d(-48 + X_OFFSET,-61 + Y_OFFSET, Math.toRadians(-315));
+        Pose2d deliverThirdSampleMoveInPose = new Pose2d(-48 + X_OFFSET,-58 + Y_OFFSET, Math.toRadians(-315));
 
-        deliverThirdSampleMoveIn = drive.actionBuilder(deliverThirdMovePose)
+        deliverThirdSampleMoveIn = deliverThirdSample.fresh()
                 .splineToLinearHeading(deliverThirdSampleMoveInPose, Math.toRadians(-90))
-                .build();
+                .endTrajectory();
 
-        park = drive.actionBuilder(new Pose2d(-50,-55,Math.toRadians(-315)))
+        park = deliverThirdSampleMoveIn.fresh()
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(-10,-10,Math.toRadians(180)),Math.toRadians(0))
-                .build();
+                .endTrajectory();
 
         intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.NEUTRAL);
         intakeSubsystem.intakePivotDown();
@@ -195,7 +200,7 @@ public class BasketAutoEx extends CommandOpMode {
                 new WaitUntilCommand(this::isStarted).andThen(
                     new SequentialCommandGroup(
 
-                            new ActionCommand(dropOffPreload, new ArraySet<>()),
+                            new ActionCommand(dropOffPreload.build(), new ArraySet<>()),
 
                             new WaitCommand(100),
                             new TransferFlipCommand(transferSubsystem),
@@ -213,7 +218,7 @@ public class BasketAutoEx extends CommandOpMode {
                             ),
                             // specimen is now delivered
 
-                            new ActionCommand(firstSample, new ArraySet<>()),
+                            new ActionCommand(firstSample.build(), new ArraySet<>()),
 
                                 new SequentialCommandGroup(
                                         new IntakeSlidesOutCommand(intakeSubsystem),
@@ -224,7 +229,7 @@ public class BasketAutoEx extends CommandOpMode {
                                                 new WaitCommand(300), //give time for the movement to start
                                                 new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                         ),
-                                        new ActionCommand(firstSampleSlowMoveIn, new ArraySet<>())
+                                        new ActionCommand(firstSampleSlowMoveIn.build(), new ArraySet<>())
                                 ),
 
 
@@ -246,11 +251,11 @@ public class BasketAutoEx extends CommandOpMode {
                                              new SequentialCommandGroup(
                                                     new ParallelCommandGroup(
                                                          //new SequentialCommandGroup(
-                                                            new ActionCommand(deliverFirstSample, new ArraySet<>()),
+                                                            new ActionCommand(deliverFirstSample.build(), new ArraySet<>()),
                                                             new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                                          //)
                                                     ),
-                                                     new ActionCommand(deliverFirstSampleMoveIn, new ArraySet<>()),
+                                                     new ActionCommand(deliverFirstSampleMoveIn.build(), new ArraySet<>()),
                                                      new OpenGripplerCommand(transferSubsystem),
                                                      new WaitCommand(250)
 
@@ -272,7 +277,7 @@ public class BasketAutoEx extends CommandOpMode {
 
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(secondSample, new ArraySet<>()),
+                                    new ActionCommand(secondSample.build(), new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
                             new SequentialCommandGroup(
@@ -285,7 +290,7 @@ public class BasketAutoEx extends CommandOpMode {
                                             new WaitCommand(300),
                                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                         ),
-                                        new ActionCommand(secondSampleSlowMoveIn, new ArraySet<>())
+                                        new ActionCommand(secondSampleSlowMoveIn.build(), new ArraySet<>())
                                     )
 
                             ),
@@ -306,10 +311,10 @@ public class BasketAutoEx extends CommandOpMode {
                                             // do the drop off if we have the sample
                                             new SequentialCommandGroup(
                                                     new ParallelCommandGroup(
-                                                            new ActionCommand(deliverSecondSample, new ArraySet<>()),
+                                                            new ActionCommand(deliverSecondSample.build(), new ArraySet<>()),
                                                             new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                                     ),
-                                                    new ActionCommand(deliverSecondSampleMoveIn, new ArraySet<>()),
+                                                    new ActionCommand(deliverSecondSampleMoveIn.build(), new ArraySet<>()),
                                                     new OpenGripplerCommand(transferSubsystem),
                                                     new WaitCommand(250)
                                             ),
@@ -325,7 +330,7 @@ public class BasketAutoEx extends CommandOpMode {
 
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(thirdSample, new ArraySet<>()),
+                                    new ActionCommand(thirdSample.build(), new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
                             //third sample
@@ -339,7 +344,7 @@ public class BasketAutoEx extends CommandOpMode {
                                     ),
                                     //new SequentialCommandGroup(
                                     //        new WaitCommand(300), //time to settle in
-                                            new ActionCommand(thirdSampleSlowMoveIn, new ArraySet<>())
+                                            new ActionCommand(thirdSampleSlowMoveIn.build(), new ArraySet<>())
                                     //)
                             ),
 
@@ -354,10 +359,10 @@ public class BasketAutoEx extends CommandOpMode {
 
                             new SequentialCommandGroup(
                                     new ParallelCommandGroup(
-                                            new ActionCommand(deliverThirdSample, new ArraySet<>()),
+                                            new ActionCommand(deliverThirdSample.build(), new ArraySet<>()),
                                             new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                     ),
-                                    new ActionCommand(deliverThirdSampleMoveIn, new ArraySet<>()),
+                                    new ActionCommand(deliverThirdSampleMoveIn.build(), new ArraySet<>()),
                                     new OpenGripplerCommand(transferSubsystem),
                                     new WaitCommand(250)
                             ),
@@ -365,7 +370,7 @@ public class BasketAutoEx extends CommandOpMode {
 
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(park, new ArraySet<>()),
+                                    new ActionCommand(park.build(), new ArraySet<>()),
                                     new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
                                     new AscentOpenHooksCommand(ascentSubsystem)
                             ),

@@ -38,6 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // Define variables
     private double intakeSlidesInPosition = 0.5;
+
     private double intakeSlidesOutPosition = 0.1;
 
     private double intakePivotUpPosition = 0;
@@ -168,8 +169,8 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void intakeSlidesHalfOut(){
-        intakeLeftSlide.setPosition(intakeSlidesOutPosition / 3);
-        intakeRightSlide.setPosition(intakeSlidesOutPosition / 3);
+        intakeLeftSlide.setPosition(intakeSlidesOutPosition * 2.5);
+        intakeRightSlide.setPosition(intakeSlidesOutPosition * 2.5);
     }
 
     public void SetPoopMode(boolean mode){
@@ -258,7 +259,7 @@ public class IntakeSubsystem extends SubsystemBase {
        NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
-        //telemetry.addData("HSV", hsvValues[0]);
+       // telemetry.addData("HSV", hsvValues[0]);
 
         if(hsvValues[0] > 200) {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
@@ -269,7 +270,7 @@ public class IntakeSubsystem extends SubsystemBase {
             }
             return SampleColour.BLUE;
         }
-        if(hsvValues[0] >= 70 && hsvValues[0] <=100) {
+        if(hsvValues[0] >= 45 && hsvValues[0] <=110) {
             if(desiredColour == SampleColour.RED_OR_NEUTRAL){
                 return SampleColour.RED_OR_NEUTRAL;
             }

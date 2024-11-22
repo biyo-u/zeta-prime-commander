@@ -26,10 +26,10 @@ public class MeepMeepBasket {
                         .setTangent(Math.toRadians(-131))
                         .splineToLinearHeading(new Pose2d(-35,-50,Math.toRadians(-235)),Math.toRadians(-131))
                 //pick up the first sample
-                        .setTangent(Math.toRadians(180))
-                    .splineToLinearHeading(new Pose2d(-55,-50,Math.toRadians(-315)),Math.toRadians(180))
+                 //       .setTangent(Math.toRadians(180))
+                //    .splineToLinearHeading(new Pose2d(-55,-50,Math.toRadians(-315)),Math.toRadians(180))
                 //drop off in the basket
-                        .setTangent(Math.toRadians(90))
+                  /*      .setTangent(Math.toRadians(90))
                      .splineToLinearHeading(new Pose2d(-58,-40,Math.toRadians(-270)),Math.toRadians(90))
 
                         .setTangent(Math.toRadians(-90))
@@ -44,7 +44,7 @@ public class MeepMeepBasket {
 
                         .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(-30,-10,Math.toRadians(180)),Math.toRadians(0))
-
+*/
 
                 .build());
 
