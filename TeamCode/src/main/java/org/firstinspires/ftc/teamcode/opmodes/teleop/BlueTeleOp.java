@@ -227,10 +227,10 @@ public class BlueTeleOp extends CommandOpMode {
 
         );
 
-        //toggle the positions of the slides for high / low basket
+        //Go high on left bumper
         m_driveDriver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
 
-                new ConditionalCommand(
+               // new ConditionalCommand(
                     new SequentialCommandGroup(
                             new CloseGripplerCommand(transferSubsystem),
                             new WaitCommand(200),
@@ -242,21 +242,7 @@ public class BlueTeleOp extends CommandOpMode {
                                 driveSpeed = 0.5;
                                 robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
                             })
-                    ),
-                        new SequentialCommandGroup(
-                                new CloseGripplerCommand(transferSubsystem),
-                                new WaitCommand(200),
-                                new ParallelCommandGroup(
-                                        new SlidesLowBasketCommand(slidesSubsystem),
-                                        new TransferFlipCommand(transferSubsystem)
-                                ),
-                                new InstantCommand(()-> {
-                                    driveSpeed = 0.5;
-                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.LOW;
-                                })
-                        ),
-                        () -> robotState.slidePosition == RobotStateSubsystem.SlideHeight.STOW || robotState.slidePosition == RobotStateSubsystem.SlideHeight.LOW
-                )
+                    )
 
         );
 
@@ -334,6 +320,26 @@ public class BlueTeleOp extends CommandOpMode {
                     new InstantCommand(intakeSubsystem::IncrSlidesFaster)
                 )
 
+        );
+
+        //move the slides to the low basket - but only when in the high position
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                            new ParallelCommandGroup(
+                                    new SlidesLowBasketCommand(slidesSubsystem),
+                                    new TransferFlipCommand(transferSubsystem)
+                            ),
+                            new InstantCommand(()-> {
+                                driveSpeed = 0.5;
+                                robotState.slidePosition = RobotStateSubsystem.SlideHeight.LOW;
+                            })
+                        ),
+                        new InstantCommand(() -> {
+                            driveSpeed = 1;
+                        }),
+                        () -> robotState.slidePosition == RobotStateSubsystem.SlideHeight.HIGH
+                )
         );
 
         //reset the hooks - not ready for climb

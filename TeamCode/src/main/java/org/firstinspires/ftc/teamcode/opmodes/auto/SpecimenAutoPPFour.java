@@ -249,6 +249,11 @@ public class SpecimenAutoPPFour extends CommandOpMode {
                             //first specimen drop
                             new ActionCommand(firstSpecimenPickup.build(), new ArraySet<>()),
                             new WaitCommand(1000),
+                            //Ryan,
+                            // Try using new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700)
+                            // if the intake finds the sample before 700ms the command will complete
+                            //otherwise it's the same as what you have below.
+                            //could buy a few secs overall
                             new IntakeOnCommand(intakeSubsystem),
                             new WaitCommand(700),
                             new ParallelCommandGroup(

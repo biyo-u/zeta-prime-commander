@@ -229,37 +229,14 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public SampleColour getCurrentIntakeColour(){
-        //TODO: add colour detection here.
 
-/*
-        telemetry.addData("Pin0", colorPin0.getState());
-        telemetry.addData("Pin1", colorPin1.getState());
-
-
-        if(colorPin1.getState() && colorPin0.getState()){
-            telemetry.addData("C", "Neutral");
-            telemetry.update();
-            return SampleColour.NEUTRAL;
-        }
-        else if(colorPin1.getState() && !colorPin0.getState()){
-            telemetry.addData("C", "Red");
-            telemetry.update();
-            return SampleColour.RED;
-        }
-        else if(colorPin0.getState() && !colorPin1.getState()){
-            telemetry.addData("C", "Blue");
-            telemetry.update();
-            return SampleColour.BLUE;
-        }else{
-            telemetry.addData("C", "None");
-            telemetry.update();
-            return SampleColour.NONE;
-        }*/
 
        NormalizedRGBA colors = colourSensor.getNormalizedColors();
         Color.colorToHSV(colors.toColor(), hsvValues);
 
-       // telemetry.addData("HSV", hsvValues[0]);
+        //telemetry.addData("HSV", hsvValues[0]);
+        //telemetry.addData("HSV2", hsvValues[1]);
+        //telemetry.update();
 
         if(hsvValues[0] > 200) {
             if(desiredColour == SampleColour.BLUE_OR_NEUTRAL){
@@ -284,7 +261,7 @@ public class IntakeSubsystem extends SubsystemBase {
             //telemetry.update();
             return SampleColour.NEUTRAL;
         }
-        if(hsvValues[0] >= 20) {
+        if(hsvValues[0] >= 0 && hsvValues[1] > 0) {
             if(desiredColour == SampleColour.RED_OR_NEUTRAL){
                 return SampleColour.RED_OR_NEUTRAL;
             }

@@ -51,7 +51,7 @@ public class ColourAwareIntakeCommand extends CommandBase {
                 }
             }
             //delay
-            if(pooping && timer.milliseconds() > 100) {
+            if(pooping && timer.milliseconds() > 200) {
                 intakeSubsystem.intakePivotDown();
                 pooping = false;
                 timer.reset();

@@ -227,35 +227,21 @@ public class RedTeleOp extends CommandOpMode {
 
         );
 
-        //toggle the positions of the slides for high / low basket
+        //Go high on left bumper
         m_driveDriver.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
 
-                new ConditionalCommand(
-                        new SequentialCommandGroup(
-                                new CloseGripplerCommand(transferSubsystem),
-                                new WaitCommand(200),
-                                new ParallelCommandGroup(
-                                        new SlidesHighBasketCommand(slidesSubsystem),
-                                        new TransferFlipCommand(transferSubsystem)
-                                ),
-                                new InstantCommand(()-> {
-                                    driveSpeed = 0.5;
-                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
-                                })
+                // new ConditionalCommand(
+                new SequentialCommandGroup(
+                        new CloseGripplerCommand(transferSubsystem),
+                        new WaitCommand(200),
+                        new ParallelCommandGroup(
+                                new SlidesHighBasketCommand(slidesSubsystem),
+                                new TransferFlipCommand(transferSubsystem)
                         ),
-                        new SequentialCommandGroup(
-                                new CloseGripplerCommand(transferSubsystem),
-                                new WaitCommand(200),
-                                new ParallelCommandGroup(
-                                        new SlidesLowBasketCommand(slidesSubsystem),
-                                        new TransferFlipCommand(transferSubsystem)
-                                ),
-                                new InstantCommand(()-> {
-                                    driveSpeed = 0.5;
-                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.LOW;
-                                })
-                        ),
-                        () -> robotState.slidePosition == RobotStateSubsystem.SlideHeight.STOW || robotState.slidePosition == RobotStateSubsystem.SlideHeight.LOW
+                        new InstantCommand(()-> {
+                            driveSpeed = 0.5;
+                            robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
+                        })
                 )
 
         );
@@ -348,6 +334,27 @@ public class RedTeleOp extends CommandOpMode {
                 )
 
         );
+
+        //slides low basket - only when coming from the high position.
+        m_driveDriver.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new ParallelCommandGroup(
+                                        new SlidesLowBasketCommand(slidesSubsystem),
+                                        new TransferFlipCommand(transferSubsystem)
+                                ),
+                                new InstantCommand(()-> {
+                                    driveSpeed = 0.5;
+                                    robotState.slidePosition = RobotStateSubsystem.SlideHeight.LOW;
+                                })
+                        ),
+                        new InstantCommand(() -> {
+                            driveSpeed = 1;
+                        }),
+                        () -> robotState.slidePosition == RobotStateSubsystem.SlideHeight.HIGH
+                )
+        );
+
 
         //operator - lift slides and put hooks into position.
         m_driveOperator.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(

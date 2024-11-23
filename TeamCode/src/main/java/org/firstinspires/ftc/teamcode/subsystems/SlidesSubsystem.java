@@ -17,7 +17,7 @@ public class SlidesSubsystem extends SubsystemBase {
     private int backwardsTransferPosition = 0;
     private int lowChamberPosition = 150;
     private int highChamberPosition = 500;
-    private int lowBasketPosition = 1210;
+    private int lowBasketPosition = 800;
     private int highBasketPosition = 2150;
 
     private int deliverHighChamberPosition = 0;
