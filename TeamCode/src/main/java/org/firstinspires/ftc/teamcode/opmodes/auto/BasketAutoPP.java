@@ -109,7 +109,7 @@ public class BasketAutoPP extends CommandOpMode {
 
 
         //slow move in
-        Pose2d slowMoveForward = new Pose2d(-49 + X_OFFSET, -58 + Y_OFFSET, Math.toRadians(-260));
+        Pose2d slowMoveForward = new Pose2d(-37 + X_OFFSET, -56 + Y_OFFSET, Math.toRadians(-235));
 
         firstSampleSlowMoveIn = firstSample.fresh()
                 .setTangent(Math.toRadians(-260))
@@ -132,21 +132,21 @@ public class BasketAutoPP extends CommandOpMode {
 
 
 
-        Pose2d secondSamplePose = new Pose2d(-56 + X_OFFSET,-65 + Y_OFFSET,Math.toRadians(100));
+        Pose2d secondSamplePose = new Pose2d(-58 + X_OFFSET,-65 + Y_OFFSET,Math.toRadians(100));
 
         secondSample = deliverFirstSampleMoveIn.fresh()
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(secondSamplePose,Math.toRadians(90))
                 .endTrajectory();
 
-        Pose2d secondSampleMoveInPose = new Pose2d(-55 + X_OFFSET,-58 + Y_OFFSET,Math.toRadians(100));
+        Pose2d secondSampleMoveInPose = new Pose2d(-58 + X_OFFSET,-56 + Y_OFFSET,Math.toRadians(100));
 
 
         secondSampleSlowMoveIn = secondSample.fresh()
                 .splineToLinearHeading(secondSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(5))
                 .endTrajectory();
 
-        Pose2d deliverSecondSamplePose = new Pose2d(-50 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
+        Pose2d deliverSecondSamplePose = new Pose2d(-56 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
 
         deliverSecondSample = secondSampleSlowMoveIn.fresh()
                 .setTangent(Math.toRadians(-90))
@@ -173,14 +173,14 @@ public class BasketAutoPP extends CommandOpMode {
                 .splineToLinearHeading(thirdSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(6))
                 .endTrajectory();
 
-        Pose2d deliverThirdMovePose = new Pose2d(-50 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
+        Pose2d deliverThirdMovePose = new Pose2d(-60 + X_OFFSET,-53 + Y_OFFSET,Math.toRadians(-315));
 
         deliverThirdSample = thirdSampleSlowMoveIn.fresh()
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(deliverThirdMovePose , Math.toRadians(-315))
                 .endTrajectory();
 
-        Pose2d deliverThirdSampleMoveInPose = new Pose2d(-48 + X_OFFSET,-58 + Y_OFFSET, Math.toRadians(-315));
+        Pose2d deliverThirdSampleMoveInPose = new Pose2d(-60 + X_OFFSET,-58 + Y_OFFSET, Math.toRadians(-315));
 
         deliverThirdSampleMoveIn = deliverThirdSample.fresh()
                 .splineToLinearHeading(deliverThirdSampleMoveInPose, Math.toRadians(-90))
@@ -371,9 +371,10 @@ public class BasketAutoPP extends CommandOpMode {
                             new ParallelCommandGroup(
 
                                     new ActionCommand(park.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
-                                    new AscentOpenHooksCommand(ascentSubsystem)
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
+
                             ),
+                            new AscentOpenHooksCommand(ascentSubsystem),
 
                             new InstantCommand(()->{
 
