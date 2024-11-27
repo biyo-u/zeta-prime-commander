@@ -15,6 +15,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
@@ -41,7 +42,8 @@ import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 import org.firstinspires.ftc.teamcode.utils.PinpointDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "BasketAuto PP", group = "Autonomous")
+@Autonomous(name = "[OLD] BasketAuto PP", group = "Autonomous")
+@Disabled
 public class BasketAutoPP extends CommandOpMode {
 
     TrajectoryActionBuilder dropOffPreload;

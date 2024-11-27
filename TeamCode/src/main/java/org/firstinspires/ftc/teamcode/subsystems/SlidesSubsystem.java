@@ -20,6 +20,10 @@ public class SlidesSubsystem extends SubsystemBase {
     private int lowBasketPosition = 800;
     private int highBasketPosition = 2150;
 
+    private int dumpPosition = 800;
+
+    private int dumpHalfPos = 400;
+
     private int deliverHighChamberPosition = 0;
 
     //IMPORTANT: this value gives the motor some breathing room on the retraction
@@ -104,6 +108,22 @@ public class SlidesSubsystem extends SubsystemBase {
         verticalSlideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         verticalSlideMotor.setPower(1);*/
         setSlideTarget(lowBasketPosition);
+    }
+
+    public void dumpPosition(){
+        setSlideTarget(dumpPosition);
+    }
+
+    public boolean IsAtDumpPosition(){
+        return verticalSlideMotor.getCurrentPosition() > (dumpPosition - 50);
+    }
+
+    public void halfDump(){
+        setSlideTarget(dumpHalfPos);
+    }
+
+    public boolean IsAtHalfDumpPosition(){
+        return verticalSlideMotor.getCurrentPosition() > (dumpHalfPos - 50);
     }
 
     public boolean IsAtLowBasket() {

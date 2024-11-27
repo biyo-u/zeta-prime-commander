@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -19,19 +18,12 @@ import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
 import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
-import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
-import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
-import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
 import org.firstinspires.ftc.teamcode.commands.groups.AutoIntakeCommandGroup;
 import org.firstinspires.ftc.teamcode.commands.groups.DeliveryCommandGroup;
 import org.firstinspires.ftc.teamcode.commands.groups.DeliveryResetCommandGroup;
-import org.firstinspires.ftc.teamcode.commands.groups.IntakeCommandGroup;
 import org.firstinspires.ftc.teamcode.subsystems.AscentSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
@@ -40,8 +32,8 @@ import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.utils.PinpointDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "BASKET | FIVE | NO PARK", group = "Autonomous")
-public class BasketAutoFivePP extends CommandOpMode {
+@Autonomous(name = "BASKET | FOUR | PARK", group = "Autonomous")
+public class BasketAutoFourPP extends CommandOpMode {
 
     TrajectoryActionBuilder dropOffPreload;
     TrajectoryActionBuilder apSample; //ap = alliance preload
@@ -107,7 +99,7 @@ public class BasketAutoFivePP extends CommandOpMode {
                 .endTrajectory();
 
 
-        apSample = dropOffPreload.fresh()
+        /*apSample = dropOffPreload.fresh()
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(-40, -64, Math.toRadians(0)), Math.toRadians(0))
                 .endTrajectory();
@@ -133,13 +125,13 @@ public class BasketAutoFivePP extends CommandOpMode {
 
         deliverAPSampleMoveIn = deliverAPSample.fresh()
                 .splineToLinearHeading(deliverAPSampleMoveInPose, Math.toRadians(-90))
-                .endTrajectory();
+                .endTrajectory();*/
 
-        Pose2d firstSamplePose = new Pose2d(-50, -62, Math.toRadians(100));
+        Pose2d firstSamplePose = new Pose2d(-50, -64, Math.toRadians(100));
 
 
-        firstSample = deliverAPSampleMoveIn.fresh()
-                .splineToLinearHeading(firstSamplePose, Math.toRadians(100))
+        firstSample = dropOffPreload.fresh()
+                .splineToLinearHeading(firstSamplePose, Math.toRadians(80))
                 .endTrajectory();
 
         Pose2d firstSampleSlowMoveInPose = new Pose2d(-50, -56, Math.toRadians(100));
@@ -220,7 +212,7 @@ public class BasketAutoFivePP extends CommandOpMode {
         park = deliverThirdSampleMoveIn.fresh()
                 .setTangent(Math.toRadians(90))
                // .splineToLinearHeading(new Pose2d(-10,-10,Math.toRadians(180)),Math.toRadians(0))
-                .splineToLinearHeading(new Pose2d(-60, -58, Math.toRadians(90)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-13, -10, Math.toRadians(180)), Math.toRadians(0))
                 .endTrajectory();
 
         intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.NEUTRAL);
@@ -251,7 +243,7 @@ public class BasketAutoFivePP extends CommandOpMode {
                                             )
 
                             ),
-                            new SequentialCommandGroup(
+                            /*new SequentialCommandGroup(
                                     new IntakeSlidesOutCommand(intakeSubsystem),
                                     new IntakePivotDownCommand(intakeSubsystem, robotState)//,
                             ),
@@ -289,7 +281,7 @@ public class BasketAutoFivePP extends CommandOpMode {
 
                                      )
 
-                            ),
+                            ),*/
 
                             new ParallelCommandGroup(
 
@@ -402,11 +394,15 @@ public class BasketAutoFivePP extends CommandOpMode {
                             ),
                             new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
 
-                            new ActionCommand(park.build(), new ArraySet<>()),
+                            new ParallelCommandGroup(
+                                    new ActionCommand(park.build(), new ArraySet<>()),
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+                                    new AscentOpenHooksCommand(ascentSubsystem)
+                            ),
 
                             new InstantCommand(()->{
 
-                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(0));
+                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(90));
 
                             })
 

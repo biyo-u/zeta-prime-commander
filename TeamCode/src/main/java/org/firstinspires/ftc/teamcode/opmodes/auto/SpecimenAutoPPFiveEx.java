@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto;
 import androidx.collection.ArraySet;
 
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -18,42 +15,30 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
-import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
-import org.firstinspires.ftc.teamcode.commands.AutoIntakeCommand;
-import org.firstinspires.ftc.teamcode.commands.CloseGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.ColourAwareIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeOffCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakeOnCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePivotDownCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakePivotUpCommand;
-import org.firstinspires.ftc.teamcode.commands.IntakePoopChuteCloseCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakePoopChuteOpenCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesInCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutCommand;
 import org.firstinspires.ftc.teamcode.commands.IntakeSlidesOutHalfCommand;
 import org.firstinspires.ftc.teamcode.commands.OpenGripplerCommand;
 import org.firstinspires.ftc.teamcode.commands.OuttakeOnCommand;
-import org.firstinspires.ftc.teamcode.commands.PoopChuteCloseCommand;
-import org.firstinspires.ftc.teamcode.commands.SlidesStowCommand;
-import org.firstinspires.ftc.teamcode.commands.SlowIntakeCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferFlipCommand;
 import org.firstinspires.ftc.teamcode.commands.TransferStowCommand;
-import org.firstinspires.ftc.teamcode.commands.groups.AutoSpecimenCommandGroup;
-import org.firstinspires.ftc.teamcode.commands.groups.DeliveryCommandGroup;
-import org.firstinspires.ftc.teamcode.commands.groups.DeliveryResetCommandGroup;
-import org.firstinspires.ftc.teamcode.commands.groups.IntakeCommandGroup;
+import org.firstinspires.ftc.teamcode.commands.groups.AutoIntakeCommandGroup;
+import org.firstinspires.ftc.teamcode.commands.groups.BackDumpCommandGroup;
 import org.firstinspires.ftc.teamcode.subsystems.AscentSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RobotStateSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.utils.PinpointDrive;
-import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "SpecimenAuto PP", group = "Autonomous")
+@Autonomous(name = "[OLD] Specimen PP Exper", group = "Autonomous")
 @Disabled
-//delivers a specimen, grabs the three samples then delivers three more specimens
-public class SpecimenAutoPP extends CommandOpMode {
+//grabs the three samples, delivers five specimens
+public class SpecimenAutoPPFiveEx extends CommandOpMode {
 
     TrajectoryActionBuilder dropOffPreload;
     TrajectoryActionBuilder firstSample;
@@ -64,6 +49,8 @@ public class SpecimenAutoPP extends CommandOpMode {
     TrajectoryActionBuilder secondSampleDrop;
     TrajectoryActionBuilder thirdSample;
     TrajectoryActionBuilder thirdSampleDrop;
+
+    TrajectoryActionBuilder thirdSampleSlow;
     TrajectoryActionBuilder firstSpecimenPickup;
     TrajectoryActionBuilder firstSpecimenDrop;
     TrajectoryActionBuilder secondSpecimenPickup;
@@ -99,63 +86,60 @@ public class SpecimenAutoPP extends CommandOpMode {
 
         // instantiate your MecanumDrive at a particular pose.
         PinpointDrive drive = new PinpointDrive(hardwareMap,
-                new Pose2d(3.5, -64, Math.toRadians(-90)));
+                new Pose2d(15, -74, Math.toRadians(90)));
 
-        //pose to the submersible wall
-        Pose2d dropOffPose = new Pose2d(-3.5, -32.5, Math.toRadians(-90));
+        Pose2d firstSamplePose = new Pose2d(36,-68,Math.toRadians(90));
 
-        dropOffPreload = drive.actionBuilder(drive.pose)
+        firstSample = drive.actionBuilder(drive.pose)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(dropOffPose, Math.toRadians(90))
+                .splineToLinearHeading(firstSamplePose,Math.toRadians(90))
                 .endTrajectory();
 
-        Pose2d firstSamplePose = new Pose2d(23,-56,Math.toRadians(58));
-
-        firstSample = dropOffPreload.fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(firstSamplePose,Math.toRadians(0))
-                .endTrajectory();
-
-        Vector2d firstSampleSlowPose = new Vector2d(25,-54);
+        Vector2d firstSampleSlowPose = new Vector2d(36,-58);
 
         firstSampleSlow = firstSample.fresh()
-                .strafeTo(firstSampleSlowPose, new TranslationalVelConstraint(70))
+                .strafeTo(firstSampleSlowPose, new TranslationalVelConstraint(10))
                 .endTrajectory();
 
         firstSampleDrop = firstSampleSlow.fresh()
-                .turn(Math.toRadians(-90))
+                .strafeTo(new Vector2d(36, -65))
                 .endTrajectory();
 
-        Pose2d secondSamplePose = new Pose2d(32,-58,Math.toRadians(58));
+        Pose2d secondSamplePose = new Pose2d(46,-68,Math.toRadians(90));
 
         secondSample = firstSampleDrop.fresh()
-                 .setTangent(Math.toRadians(58))
-                 .splineToLinearHeading(secondSamplePose, Math.toRadians(58))
+                 .setTangent(Math.toRadians(90))
+                 .splineToLinearHeading(secondSamplePose, Math.toRadians(90))
                  .endTrajectory();
 
-        Vector2d secondSampleSlowPose = new Vector2d(35,-54);
+        Vector2d secondSampleSlowPose = new Vector2d(46,-58);
 
         secondSampleSlow = secondSample.fresh()
-                .strafeTo(secondSampleSlowPose, new TranslationalVelConstraint(60))
+                .strafeTo(secondSampleSlowPose, new TranslationalVelConstraint(10))
                 .endTrajectory();
 
         secondSampleDrop = secondSampleSlow.fresh()
-                .turn(Math.toRadians(-90))
+                .strafeTo(new Vector2d(40, -65))
                 .endTrajectory();
 
-        Pose2d thirdSamplePose = new Pose2d(35,-38,Math.toRadians(10));
+        Pose2d thirdSamplePose = new Pose2d(48,-68,Math.toRadians(60));
 
         thirdSample = secondSampleDrop.fresh()
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(thirdSamplePose, Math.toRadians(10))
+                .splineToLinearHeading(thirdSamplePose, Math.toRadians(60))
                 .endTrajectory();
 
-        Pose2d thirdSampleDropPose = new Pose2d(42,-40,Math.toRadians(-90));
+        thirdSampleSlow = thirdSample.fresh()
+                .strafeTo(new Vector2d(42, -63))
+                .endTrajectory();
+
+        Pose2d thirdSampleDropPose = new Pose2d(48,-60,Math.toRadians(90));
 
         thirdSampleDrop = thirdSample.fresh()
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(thirdSampleDropPose, Math.toRadians(-90))
+                .setTangent(Math.toRadians(90))
+                .splineToLinearHeading(thirdSampleDropPose, Math.toRadians(90))
                 .endTrajectory();
+
 
 
         //first specimen
@@ -205,30 +189,12 @@ public class SpecimenAutoPP extends CommandOpMode {
 
         intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.AUTO_ANY);
         intakeSubsystem.intakePivotDown();
-        transferSubsystem.closeGrippler();
+        transferSubsystem.openGrippler();
 
 
         CommandScheduler.getInstance().schedule(
                 new WaitUntilCommand(this::isStarted).andThen(
                     new SequentialCommandGroup(
-
-                            new ActionCommand(dropOffPreload.build(), new ArraySet<>()),
-
-                            new WaitCommand(100),
-                            new TransferFlipCommand(transferSubsystem),
-                            new WaitCommand(500),
-                            new SequentialCommandGroup(
-
-                                    new OpenGripplerCommand(transferSubsystem),
-                                    new TransferStowCommand(transferSubsystem),
-
-                                    new IntakePivotUpCommand(intakeSubsystem, robotState),
-                                    new SlidesStowCommand(slidesSubsystem),
-                                    new InstantCommand(()->{
-                                        slidesSubsystem.NoPowerSlides();
-                                    })
-                            ),
-                            // specimen is now delivered
 
                             //first sample
                             new ParallelCommandGroup(
@@ -240,38 +206,66 @@ public class SpecimenAutoPP extends CommandOpMode {
                                     new IntakePivotDownCommand(intakeSubsystem, robotState)
                                 )
                             ),
-
-                            new ParallelCommandGroup(
-                                new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(400),
-                                new ActionCommand(firstSampleSlow.build(), new ArraySet<>())
-                            ),
-                            new ActionCommand(firstSampleDrop.build(), new ArraySet<>()),
-                            new OuttakeOnCommand(intakeSubsystem),
-                            new WaitCommand(500),
-                            new IntakeOffCommand(intakeSubsystem),
-
-                            //second sample
-                            new ActionCommand(secondSample.build(), new ArraySet<>()),
+                            new OpenGripplerCommand(transferSubsystem),
                             new ParallelCommandGroup(
                                     new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(400),
+                                    new ActionCommand(firstSampleSlow.build(), new ArraySet<>())
+                            ),
+                            new ParallelCommandGroup(
+                                new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState),
+
+                                new ActionCommand(firstSampleDrop.build(), new ArraySet<>())
+                            ),
+
+                            new BackDumpCommandGroup(slidesSubsystem, transferSubsystem,robotState),
+
+
+                            //second sample
+                            new ParallelCommandGroup(
+                                    new ActionCommand(secondSample.build(), new ArraySet<>()),
+                                    new SequentialCommandGroup(
+                                        new IntakePivotDownCommand(intakeSubsystem, robotState),
+                                        new IntakePoopChuteOpenCommand(intakeSubsystem),
+                                        new IntakeSlidesOutCommand(intakeSubsystem)
+                                    )
+                            ),
+                            new OpenGripplerCommand(transferSubsystem),
+                            new ParallelCommandGroup(
+
+                                    new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(400),
                                     new ActionCommand(secondSampleSlow.build(), new ArraySet<>())
-                            ),new ActionCommand(secondSampleDrop.build(), new ArraySet<>()),
-                            new OuttakeOnCommand(intakeSubsystem),
-                            new WaitCommand(500),
-                            new IntakeOffCommand(intakeSubsystem),
-                            new IntakeSlidesOutHalfCommand(intakeSubsystem),
+                            ),
+                            new ParallelCommandGroup(
+                                    new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState),
+                                    new ActionCommand(secondSampleDrop.build(), new ArraySet<>())
+                            ),
+
+                            new BackDumpCommandGroup(slidesSubsystem, transferSubsystem,robotState),
+
 
                             //third sample
-                            new ActionCommand(thirdSample.build(), new ArraySet<>()),
-                            new IntakeSlidesOutCommand(intakeSubsystem),
-                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(400),
-                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(200),
-                            new ActionCommand(thirdSampleDrop.build(), new ArraySet<>()),
-                            new IntakeSlidesOutCommand(intakeSubsystem),
-                            new WaitCommand(500),
-                            new OuttakeOnCommand(intakeSubsystem),
-                            new WaitCommand(500),
-                            new IntakeOffCommand(intakeSubsystem),
+                            new ParallelCommandGroup(
+                                    new ActionCommand(thirdSample.build(), new ArraySet<>()),
+                                    new SequentialCommandGroup(
+                                        new IntakePivotDownCommand(intakeSubsystem, robotState),
+                                        new IntakePoopChuteOpenCommand(intakeSubsystem),
+                                        new IntakeSlidesOutCommand(intakeSubsystem)
+                                    )
+                            ),
+                            new OpenGripplerCommand(transferSubsystem),
+                            new ParallelCommandGroup(
+                                new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(400),
+                                new ActionCommand(thirdSampleSlow.build(), new ArraySet<>())
+                            ),
+
+                            new ParallelCommandGroup(
+                                new ActionCommand(thirdSampleDrop.build(), new ArraySet<>()),
+                                new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
+
+                            ),
+
+                            new BackDumpCommandGroup(slidesSubsystem, transferSubsystem,robotState),
+
 
                             //first specimen drop
                             new ActionCommand(firstSpecimenPickup.build(), new ArraySet<>()),
@@ -279,17 +273,7 @@ public class SpecimenAutoPP extends CommandOpMode {
                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700),
                             new ParallelCommandGroup(
                                 new ActionCommand(firstSpecimenDrop.build(), new ArraySet<>()),
-                                new SequentialCommandGroup(
-                                        new IntakePivotUpCommand(intakeSubsystem, robotState),
-                                        new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(200),
-                                        new IntakePoopChuteCloseCommand(intakeSubsystem),
-                                        new SlowIntakeCommand(intakeSubsystem),
-                                        new WaitCommand(200),
-                                        new IntakeOffCommand(intakeSubsystem),
-                                        new CloseGripplerCommand(transferSubsystem),
-                                        new WaitCommand(500),
-                                        new IntakePivotDownCommand(intakeSubsystem,robotState)
-                                )
+                                new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
                             ),
                             new WaitCommand(500),
                             new TransferFlipCommand(transferSubsystem),
@@ -305,17 +289,7 @@ public class SpecimenAutoPP extends CommandOpMode {
                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700),
                             new ParallelCommandGroup(
                                     new ActionCommand(secondSpecimenDrop.build(), new ArraySet<>()),
-                                    new SequentialCommandGroup(
-                                            new IntakePivotUpCommand(intakeSubsystem, robotState),
-                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(200),
-                                            new IntakePoopChuteCloseCommand(intakeSubsystem),
-                                            new SlowIntakeCommand(intakeSubsystem),
-                                            new WaitCommand(500),
-                                            new IntakeOffCommand(intakeSubsystem),
-                                            new CloseGripplerCommand(transferSubsystem),
-                                            new WaitCommand(500),
-                                            new IntakePivotDownCommand(intakeSubsystem,robotState)
-                                    )
+                                    new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
                             ),
                             new WaitCommand(500),
                             new TransferFlipCommand(transferSubsystem),
@@ -331,17 +305,37 @@ public class SpecimenAutoPP extends CommandOpMode {
                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700),
                             new ParallelCommandGroup(
                                     new ActionCommand(thirdSpecimenDrop.build(), new ArraySet<>()),
-                                    new SequentialCommandGroup(
-                                            new IntakePivotUpCommand(intakeSubsystem, robotState),
-                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(200),
-                                            new IntakePoopChuteCloseCommand(intakeSubsystem),
-                                            new SlowIntakeCommand(intakeSubsystem),
-                                            new WaitCommand(500),
-                                            new IntakeOffCommand(intakeSubsystem),
-                                            new CloseGripplerCommand(transferSubsystem),
-                                            new WaitCommand(500),
-                                            new IntakePivotDownCommand(intakeSubsystem,robotState)
-                                    )
+                                    new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
+                            ),
+                            new WaitCommand(500),
+                            new TransferFlipCommand(transferSubsystem),
+                            new WaitCommand(500),
+                            new OpenGripplerCommand(transferSubsystem),
+                            new TransferStowCommand(transferSubsystem),
+                            new IntakePoopChuteOpenCommand(intakeSubsystem),
+
+                            //fourth specimen drop
+                            new ActionCommand(thirdSpecimenPickup.build(), new ArraySet<>()),
+                            new WaitCommand(1000),
+                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700),
+                            new ParallelCommandGroup(
+                                    new ActionCommand(thirdSpecimenDrop.build(), new ArraySet<>()),
+                                    new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
+                            ),
+                            new WaitCommand(500),
+                            new TransferFlipCommand(transferSubsystem),
+                            new WaitCommand(500),
+                            new OpenGripplerCommand(transferSubsystem),
+                            new TransferStowCommand(transferSubsystem),
+                            new IntakePoopChuteOpenCommand(intakeSubsystem),
+
+                            //fifth specimen drop
+                            new ActionCommand(thirdSpecimenPickup.build(), new ArraySet<>()),
+                            new WaitCommand(1000),
+                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(700),
+                            new ParallelCommandGroup(
+                                    new ActionCommand(thirdSpecimenDrop.build(), new ArraySet<>()),
+                                    new AutoIntakeCommandGroup(intakeSubsystem,transferSubsystem, robotState)
                             ),
                             new WaitCommand(500),
                             new TransferFlipCommand(transferSubsystem),
@@ -351,7 +345,9 @@ public class SpecimenAutoPP extends CommandOpMode {
                             new IntakePoopChuteOpenCommand(intakeSubsystem)
                     )
                 )
+
         );
+
 
     }
 

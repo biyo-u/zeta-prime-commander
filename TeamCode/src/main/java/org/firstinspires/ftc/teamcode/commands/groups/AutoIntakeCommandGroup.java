@@ -31,13 +31,10 @@ public class AutoIntakeCommandGroup extends SequentialCommandGroup {
         robotState = state;
 
         addCommands(
-
                 new IntakeOffCommand(intakeSubsystem),
 
-                new ParallelCommandGroup(
-                        new IntakePivotUpCommand(intakeSubsystem, robotState),
-                        new MiddleGripplerRotationCommand(transferSubsystem)
-                ),
+                new IntakePivotUpCommand(intakeSubsystem,robotState),
+
                 new PoopChuteCloseCommand(intakeSubsystem),
 
                 new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500),

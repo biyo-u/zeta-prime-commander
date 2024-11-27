@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.AscentOpenHooksCommand;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
 @Autonomous(name = "Red Co Op", group = "Autonomous")
+@Disabled
 public class RedCoOpAuto extends CommandOpMode {
 
     Action dropOffPreload;

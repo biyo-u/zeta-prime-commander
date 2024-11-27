@@ -12,6 +12,7 @@ import com.arcrobotics.ftclib.command.RepeatCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.commands.ActionCommand;
 import org.firstinspires.ftc.teamcode.commands.AutoIntakeCommand;
@@ -31,7 +32,8 @@ import org.firstinspires.ftc.teamcode.subsystems.SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 
-@Autonomous(name = "SpecimenAuto", group = "Autonomous")
+@Autonomous(name = "[OLD] SpecimenAuto", group = "Autonomous")
+@Disabled
 public class SpecimenAuto extends CommandOpMode {
 
     private IntakeSubsystem intakeSubsystem;
