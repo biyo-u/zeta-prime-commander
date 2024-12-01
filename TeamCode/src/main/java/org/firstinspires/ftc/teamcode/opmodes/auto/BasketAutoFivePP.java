@@ -170,14 +170,14 @@ public class BasketAutoFivePP extends CommandOpMode {
                 .splineToLinearHeading(secondSamplePose,Math.toRadians(90))
                 .endTrajectory();
 
-        Pose2d secondSampleMoveInPose = new Pose2d(-60 + X_OFFSET,-56 + Y_OFFSET,Math.toRadians(100));
+        Pose2d secondSampleMoveInPose = new Pose2d(-60 + X_OFFSET,-53 + Y_OFFSET,Math.toRadians(100));
 
 
         secondSampleSlowMoveIn = secondSample.fresh()
                 .splineToLinearHeading(secondSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(5))
                 .endTrajectory();
 
-        Pose2d deliverSecondSamplePose = new Pose2d(-56 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
+        Pose2d deliverSecondSamplePose = new Pose2d(-60 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-315));
 
         deliverSecondSample = secondSampleSlowMoveIn.fresh()
                 .setTangent(Math.toRadians(-90))
@@ -198,7 +198,7 @@ public class BasketAutoFivePP extends CommandOpMode {
                 .splineToLinearHeading(thirdSamplePose,Math.toRadians(103))
                 .endTrajectory();
 
-        Pose2d thirdSampleMoveInPose = new Pose2d(-62 + X_OFFSET,-55 + Y_OFFSET,Math.toRadians(-242));
+        Pose2d thirdSampleMoveInPose = new Pose2d(-62 + X_OFFSET,-52 + Y_OFFSET,Math.toRadians(-242));
 
         thirdSampleSlowMoveIn = thirdSample.fresh()
                 .splineToLinearHeading(thirdSampleMoveInPose, Math.toRadians(90), new TranslationalVelConstraint(6))
@@ -273,9 +273,9 @@ public class BasketAutoFivePP extends CommandOpMode {
 
                             new SequentialCommandGroup(
                                     new CloseGripplerCommand(transferSubsystem),
-                                    new WaitCommand(200),
+                                    //new WaitCommand(200),
 
-                                    // do the drop off if we have the sample
+
                                      new SequentialCommandGroup(
                                             new ParallelCommandGroup(
 
@@ -316,7 +316,7 @@ public class BasketAutoFivePP extends CommandOpMode {
                             new SequentialCommandGroup(
                                     new CloseGripplerCommand(transferSubsystem),
 
-                                    // do the drop off if we have the sample
+
                                     new SequentialCommandGroup(
                                             new ParallelCommandGroup(
                                                     new ActionCommand(firstSampleDeliver.build(), new ArraySet<>()),

@@ -310,12 +310,13 @@ public class SpecimenAutoPPFourSydney extends CommandOpMode {
                             new TransferStowCommand(transferSubsystem),
                             new IntakePoopChuteOpenCommand(intakeSubsystem),
 
-                            new ActionCommand(park.build(), new ArraySet<>()),
                             new InstantCommand(()->{
 
                                 PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(180));
 
-                            })
+                            }),
+                            new ActionCommand(park.build(), new ArraySet<>())
+
 
                     )
                 )

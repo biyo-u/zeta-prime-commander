@@ -42,8 +42,8 @@ import org.firstinspires.ftc.teamcode.utils.OTOSDrive;
 import org.firstinspires.ftc.teamcode.utils.PinpointDrive;
 import org.firstinspires.ftc.teamcode.utils.PoseStorage;
 
-@Autonomous(name = "[OLD] BasketAuto PP", group = "Autonomous")
-@Disabled
+@Autonomous(name = "SPEC | THREE | PARK", group = "Autonomous")
+
 public class BasketAutoPP extends CommandOpMode {
 
     TrajectoryActionBuilder dropOffPreload;
@@ -111,7 +111,7 @@ public class BasketAutoPP extends CommandOpMode {
 
 
         //slow move in
-        Pose2d slowMoveForward = new Pose2d(-37 + X_OFFSET, -56 + Y_OFFSET, Math.toRadians(-235));
+        Pose2d slowMoveForward = new Pose2d(-37 + X_OFFSET, -52 + Y_OFFSET, Math.toRadians(-235));
 
         firstSampleSlowMoveIn = firstSample.fresh()
                 .setTangent(Math.toRadians(-260))
@@ -222,60 +222,33 @@ public class BasketAutoPP extends CommandOpMode {
 
                             new ActionCommand(firstSample.build(), new ArraySet<>()),
 
-                                new SequentialCommandGroup(
-                                        new IntakeSlidesOutCommand(intakeSubsystem),
-                                        new IntakePivotDownCommand(intakeSubsystem, robotState)//,
-                                 ),
-                                new ParallelCommandGroup(
-                                        new SequentialCommandGroup(
-                                                new WaitCommand(300), //give time for the movement to start
-                                                new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
-                                        ),
-                                        new ActionCommand(firstSampleSlowMoveIn.build(), new ArraySet<>())
-                                ),
-
-
-                            new ConditionalCommand(
-                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new SequentialCommandGroup(
-                                            new IntakeOffCommand(intakeSubsystem), //just retracting with no sample - do nothing
-                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
-                                    ),
-                                    () -> true// intakeSubsystem.hasItemInIntake()
-                            ),
-
-
                             new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
-                                    new WaitCommand(200),
-                                    new ConditionalCommand(
-                                            // do the drop off if we have the sample
-                                             new SequentialCommandGroup(
-                                                    new ParallelCommandGroup(
-                                                         //new SequentialCommandGroup(
-                                                            new ActionCommand(deliverFirstSample.build(), new ArraySet<>()),
-                                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
-                                                         //)
-                                                    ),
-                                                     new ActionCommand(deliverFirstSampleMoveIn.build(), new ArraySet<>()),
-                                                     new OpenGripplerCommand(transferSubsystem),
-                                                     new WaitCommand(250)
-
-                                             ),
-                                             //don't do the drop off - we don't have the sample
-                                             new SequentialCommandGroup(
-                                                     /*new InstantCommand(() ->{
-                                                        telemetry.addData("No Item", "No sample found");
-                                                        telemetry.update();
-                                                     }),*/
-                                                     new IntakeOffCommand(intakeSubsystem),
-                                                     new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
-                                             ),
-                                            () -> true//intakeSubsystem.hasItemInIntake()
-                                            //TODO: The hasItemInIntake needs some work - not consistent
-                                    )
-
+                                    new IntakeSlidesOutCommand(intakeSubsystem),
+                                    new IntakePivotDownCommand(intakeSubsystem, robotState)//,
+                             ),
+                            new ParallelCommandGroup(
+                                    new SequentialCommandGroup(
+                                            new WaitCommand(300), //give time for the movement to start
+                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+                                    ),
+                                    new ActionCommand(firstSampleSlowMoveIn.build(), new ArraySet<>())
                             ),
+                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+                            new CloseGripplerCommand(transferSubsystem),
+                            new WaitCommand(200),
+
+                             new SequentialCommandGroup(
+                                    new ParallelCommandGroup(
+
+                                            new ActionCommand(deliverFirstSample.build(), new ArraySet<>()),
+                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+
+                                    ),
+                                     new ActionCommand(deliverFirstSampleMoveIn.build(), new ArraySet<>()),
+                                     new OpenGripplerCommand(transferSubsystem),
+                                     new WaitCommand(250)
+
+                             ),
 
                             new ParallelCommandGroup(
 
@@ -297,19 +270,12 @@ public class BasketAutoPP extends CommandOpMode {
 
                             ),
 
-                            new ConditionalCommand(
-                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new SequentialCommandGroup( //don't have anything in the intake
-                                            new IntakeOffCommand(intakeSubsystem),
-                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
-                                    ),
-                                    () -> true// intakeSubsystem.hasItemInIntake()
-                            ),
+                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
 
 
                             new SequentialCommandGroup(
                                     new CloseGripplerCommand(transferSubsystem),
-                                    new ConditionalCommand(
+
                                             // do the drop off if we have the sample
                                             new SequentialCommandGroup(
                                                     new ParallelCommandGroup(
@@ -319,14 +285,7 @@ public class BasketAutoPP extends CommandOpMode {
                                                     new ActionCommand(deliverSecondSampleMoveIn.build(), new ArraySet<>()),
                                                     new OpenGripplerCommand(transferSubsystem),
                                                     new WaitCommand(250)
-                                            ),
-                                            //don't do the drop off - we don't have the sample
-                                            new SequentialCommandGroup(
-                                                    new IntakeOffCommand(intakeSubsystem),
-                                                    new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
-                                            ),
-                                            () -> true // intakeSubsystem.hasItemInIntake()
-                                    )
+                                            )
                             ),
 
 
@@ -344,20 +303,12 @@ public class BasketAutoPP extends CommandOpMode {
                                             new IntakePivotDownCommand(intakeSubsystem, robotState),
                                             new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                     ),
-                                    //new SequentialCommandGroup(
-                                    //        new WaitCommand(300), //time to settle in
-                                            new ActionCommand(thirdSampleSlowMoveIn.build(), new ArraySet<>())
-                                    //)
+                                    new ActionCommand(thirdSampleSlowMoveIn.build(), new ArraySet<>())
                             ),
 
-                            new ConditionalCommand(
-                                    new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
-                                    new SequentialCommandGroup( //don't have anything in the intake
-                                            new IntakeOffCommand(intakeSubsystem),
-                                            new IntakeSlidesInCommand(intakeSubsystem, transferSubsystem).withTimeout(500)
-                                    ),
-                                    () -> true //intakeSubsystem.hasItemInIntake()
-                            ),
+
+                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+
 
                             new SequentialCommandGroup(
                                     new ParallelCommandGroup(
@@ -373,19 +324,15 @@ public class BasketAutoPP extends CommandOpMode {
                             new ParallelCommandGroup(
 
                                     new ActionCommand(park.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
+                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+                                    new AscentOpenHooksCommand(ascentSubsystem),
+                                    new InstantCommand(()->{
 
-                            ),
-                            new AscentOpenHooksCommand(ascentSubsystem),
+                                        PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(-270));
 
-                            new InstantCommand(()->{
+                                    })
 
-                                PoseStorage.currentPose = new Pose2d(0, 0, Math.toRadians(-270));
-
-                            })
-
-                          //  new ActionCommand(park, new ArraySet<>())
-
+                            )
                     )
                 )
         );

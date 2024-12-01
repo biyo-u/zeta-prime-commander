@@ -239,7 +239,7 @@ public class RedTeleOp extends CommandOpMode {
                                 new TransferFlipCommand(transferSubsystem)
                         ),
                         new InstantCommand(()-> {
-                            driveSpeed = 0.5;
+                            driveSpeed = 0.8;
                             robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
                         })
                 )

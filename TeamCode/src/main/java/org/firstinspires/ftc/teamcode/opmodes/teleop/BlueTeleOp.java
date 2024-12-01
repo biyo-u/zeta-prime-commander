@@ -169,7 +169,7 @@ public class BlueTeleOp extends CommandOpMode {
 
                         new TransferFlipCommand(transferSubsystem),
                         new InstantCommand(()-> {
-                            driveSpeed = 0.7;
+                            driveSpeed = 1;
                         })
                 )).whenInactive(
                     new SequentialCommandGroup(
@@ -239,7 +239,7 @@ public class BlueTeleOp extends CommandOpMode {
                                     new TransferFlipCommand(transferSubsystem)
                             ),
                             new InstantCommand(()-> {
-                                driveSpeed = 0.5;
+                                driveSpeed = 0.8;
                                 robotState.slidePosition = RobotStateSubsystem.SlideHeight.HIGH;
                             })
                     )

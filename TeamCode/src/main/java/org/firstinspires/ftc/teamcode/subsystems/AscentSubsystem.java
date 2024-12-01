@@ -19,7 +19,7 @@ public class AscentSubsystem extends SubsystemBase {
     // Define variables
     private int ascentStowedPosition = 0;
     private int ascentLowRungPreparedPosition = 0;
-    private int ascentLowRungPosition = 6650; // Distance 274mm C2C  (old 6400)
+    private int ascentLowRungPosition = 3300;//4300;// 6650; // Distance 274mm C2C  (old 6400)
     private int ascentHighRungPosition = 0;
     private int ascentFinishedLevel3Position = 0;
 

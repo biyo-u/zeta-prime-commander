@@ -41,7 +41,7 @@ public class AutoIntakeCommandGroup extends SequentialCommandGroup {
                 new WaitCommand(100), //wait for the transfer to stablize
                 new SlowIntakeCommand(intakeSubsystem),
 
-                new WaitCommand(180),
+                new WaitCommand(220),
 
                 new ConditionalCommand(
                         new WaitCommand(1), //do nothing, we have no sample
