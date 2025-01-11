@@ -340,7 +340,7 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
         if (pods == GoBildaOdometryPods.goBILDA_SWINGARM_POD) {
             writeByteArray(Register.MM_PER_TICK, (floatToByteArray(goBILDA_SWINGARM_POD, ByteOrder.LITTLE_ENDIAN)));
         }
-        if (pods == GoBildaOdometryPods.goBILDA_4_BAR_POD) {
+        else {
             writeByteArray(Register.MM_PER_TICK, (floatToByteArray(goBILDA_4_BAR_POD, ByteOrder.LITTLE_ENDIAN)));
         }
     }
