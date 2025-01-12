@@ -36,15 +36,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumLocalizerInputsMessage;
 import org.firstinspires.ftc.teamcode.messages.PoseMessage;
+import org.firstinspires.ftc.teamcode.utils.GoBildaPinpointDriver;
 
 import java.lang.Math;
 import java.util.Arrays;
@@ -71,6 +69,8 @@ public class MecanumDrive {
         public double kS =  0.563756515907424;
         public double kV = 0.19141851548064043;
         public double kA = 0.001;
+
+
 
         // path profile parameters (in inches)
         public double maxWheelVel = 50;
@@ -110,7 +110,11 @@ public class MecanumDrive {
 
     public final VoltageSensor voltageSensor;
 
-    public final LazyImu lazyImu;
+    //public final LazyImu lazyImu;
+
+    public final GoBildaPinpointDriver pinpointIMU;
+
+
 
     public final Localizer localizer;
     public Pose2d pose;
@@ -124,11 +128,12 @@ public class MecanumDrive {
 
     public class DriveLocalizer implements Localizer {
         public final Encoder leftFront, leftBack, rightBack, rightFront;
-        public final IMU imu;
+       // public final IMU imu;
 
         private int lastLeftFrontPos, lastLeftBackPos, lastRightBackPos, lastRightFrontPos;
         private Rotation2d lastHeading;
         private boolean initialized;
+
 
         public DriveLocalizer() {
             leftFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.frontLeftMotor));
@@ -136,7 +141,7 @@ public class MecanumDrive {
             rightBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.backRightMotor));
             rightFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.frontRightMotor));
 
-            imu = lazyImu.get();
+//            imu = lazyImu.get();
 
             // TODO: reverse encoders if needed
             //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -149,12 +154,12 @@ public class MecanumDrive {
             PositionVelocityPair rightBackPosVel = rightBack.getPositionAndVelocity();
             PositionVelocityPair rightFrontPosVel = rightFront.getPositionAndVelocity();
 
-            YawPitchRollAngles angles = imu.getRobotYawPitchRollAngles();
+            double angles = pinpointIMU.getHeading();
 
             FlightRecorder.write("MECANUM_LOCALIZER_INPUTS", new MecanumLocalizerInputsMessage(
                     leftFrontPosVel, leftBackPosVel, rightBackPosVel, rightFrontPosVel, angles));
 
-            Rotation2d heading = Rotation2d.exp(angles.getYaw(AngleUnit.RADIANS));
+            Rotation2d heading = Rotation2d.exp(angles);
 
             if (!initialized) {
                 initialized = true;
@@ -207,6 +212,7 @@ public class MecanumDrive {
     }
 
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
+
         this.pose = pose;
 
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
@@ -234,8 +240,7 @@ public class MecanumDrive {
 
         // TODO: make sure your config has an IMU with this name (can be BNO or BHI)
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        lazyImu = new LazyImu(hardwareMap, "imu", new RevHubOrientationOnRobot(
-                PARAMS.logoFacingDirection, PARAMS.usbFacingDirection));
+        pinpointIMU = (GoBildaPinpointDriver) hardwareMap.get("odo");;
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
