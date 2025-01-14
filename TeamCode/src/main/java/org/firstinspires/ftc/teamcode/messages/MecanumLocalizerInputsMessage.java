@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.messages;
 import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.utils.GoBildaPinpointDriver;
 
 public final class MecanumLocalizerInputsMessage {
@@ -17,16 +18,16 @@ public final class MecanumLocalizerInputsMessage {
 
     public GoBildaPinpointDriver pinpoint;
 
-    public MecanumLocalizerInputsMessage(PositionVelocityPair leftFront, PositionVelocityPair leftBack, PositionVelocityPair rightBack, PositionVelocityPair rightFront, double angles) {
+    public MecanumLocalizerInputsMessage(PositionVelocityPair leftFront, PositionVelocityPair leftBack, PositionVelocityPair rightBack, PositionVelocityPair rightFront, YawPitchRollAngles angles) {
         this.timestamp = System.nanoTime();
         this.leftFront = leftFront;
         this.leftBack = leftBack;
         this.rightBack = rightBack;
         this.rightFront = rightFront;
         {
-            this.yaw = pinpoint.getHeading();
-//            this.pitch = angles.getPitch(AngleUnit.RADIANS);
-//            this.roll = angles.getRoll(AngleUnit.RADIANS);
+            this.yaw =angles.getYaw(AngleUnit.RADIANS) ;
+           this.pitch = angles.getPitch(AngleUnit.RADIANS);
+           this.roll = angles.getRoll(AngleUnit.RADIANS);
         }
     }
 }

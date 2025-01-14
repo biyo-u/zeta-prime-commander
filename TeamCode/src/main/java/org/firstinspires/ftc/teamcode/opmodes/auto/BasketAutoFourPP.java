@@ -63,15 +63,15 @@ public class BasketAutoFourPP extends CommandOpMode {
 
 
     Action pleaseWork;
-    IntakeSubsystem intakeSubsystem;
-
-    TransferSubsystem transferSubsystem;
-
-    RobotStateSubsystem robotState;
-
-    SlidesSubsystem slidesSubsystem;
-
-    AscentSubsystem ascentSubsystem;
+//    IntakeSubsystem intakeSubsystem;
+//
+//    TransferSubsystem transferSubsystem;
+//
+//    RobotStateSubsystem robotState;
+//
+//    SlidesSubsystem slidesSubsystem;
+//
+//    AscentSubsystem ascentSubsystem;
 
     //Change these offsets, they can be negative values
     int X_OFFSET = 0; // a larger negative number takes it closer to the basket
@@ -80,11 +80,11 @@ public class BasketAutoFourPP extends CommandOpMode {
     @Override
     public void initialize() {
 
-        intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
-        transferSubsystem = new TransferSubsystem(hardwareMap);
-        robotState = new RobotStateSubsystem();
-        slidesSubsystem = new SlidesSubsystem(hardwareMap);
-        ascentSubsystem = new AscentSubsystem(hardwareMap);
+//        intakeSubsystem = new IntakeSubsystem(hardwareMap, telemetry);
+//        transferSubsystem = new TransferSubsystem(hardwareMap);
+//        robotState = new RobotStateSubsystem();
+//        slidesSubsystem = new SlidesSubsystem(hardwareMap);
+//        ascentSubsystem = new AscentSubsystem(hardwareMap);
 
 
         // instantiate your MecanumDrive at a particular pose.
@@ -189,9 +189,9 @@ public class BasketAutoFourPP extends CommandOpMode {
                 .splineToLinearHeading(new Pose2d(-13, -10, Math.toRadians(180)), Math.toRadians(0))
                 .endTrajectory();
 
-        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.NEUTRAL);
-        intakeSubsystem.intakePivotDown();
-        transferSubsystem.closeGrippler();
+//        intakeSubsystem.setDesiredColour(IntakeSubsystem.SampleColour.NEUTRAL);
+//        intakeSubsystem.intakePivotDown();
+//        transferSubsystem.closeGrippler();
 
 
         CommandScheduler.getInstance().schedule(
@@ -199,20 +199,20 @@ public class BasketAutoFourPP extends CommandOpMode {
                     new SequentialCommandGroup(
 
                             new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
-                                            // do the drop off if we have the sample
-                                            new SequentialCommandGroup(
-                                                    new ParallelCommandGroup(
-
-                                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState ),
-                                                          new SequentialCommandGroup(
-                                                                  new WaitCommand(700), //give the slides time to move up
-                                                                  new ActionCommand(dropOffPreload.build(), new ArraySet<>())
-                                                          )
-                                                    ),
-                                                    //new WaitCommand(200),
-                                                    new OpenGripplerCommand(transferSubsystem),
-                                                    new WaitCommand(250)
+//                                    new CloseGripplerCommand(transferSubsystem),
+//                                            // do the drop off if we have the sample
+//                                            new SequentialCommandGroup(
+//                                                    new ParallelCommandGroup(
+//
+//                                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState ),
+//                                                          new SequentialCommandGroup(
+//                                                                  new WaitCommand(700), //give the slides time to move up
+//                                                                  new ActionCommand(dropOffPreload.build(), new ArraySet<>())
+//                                                          )
+//                                                    ),
+//                                                    //new WaitCommand(200),
+//                                                    new OpenGripplerCommand(transferSubsystem),
+//                                                    new WaitCommand(250)
 
                                             )
 
@@ -220,37 +220,37 @@ public class BasketAutoFourPP extends CommandOpMode {
 
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(firstSample.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
-                                    new SequentialCommandGroup(
-                                          new InstantCommand(intakeSubsystem::intakeSlidesOut), // new IntakeSlidesOutCommand(intakeSubsystem),
-                                          new InstantCommand(intakeSubsystem::intakePivotDown) // new IntakePivotDownCommand(intakeSubsystem, robotState)
-                                    )
+//                                    new ActionCommand(firstSample.build(), new ArraySet<>()),
+//                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+//                                    new SequentialCommandGroup(
+//                                          new InstantCommand(intakeSubsystem::intakeSlidesOut), // new IntakeSlidesOutCommand(intakeSubsystem),
+//                                          new InstantCommand(intakeSubsystem::intakePivotDown) // new IntakePivotDownCommand(intakeSubsystem, robotState)
+//                                    )
                             ),
                             new SequentialCommandGroup(
 
                                     new ParallelCommandGroup(
                                             new SequentialCommandGroup(
-                                                    new WaitCommand(300),
-                                                    new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+                                                    new WaitCommand(300)
+//                                                    new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                             ),
                                             new ActionCommand(firstSampleSlowMoveIn.build(), new ArraySet<>())
                                     )
 
                             ),
-                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+//                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
 
                             new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
+//                                    new CloseGripplerCommand(transferSubsystem),
 
                                     // do the drop off if we have the sample
                                     new SequentialCommandGroup(
                                             new ParallelCommandGroup(
-                                                    new ActionCommand(firstSampleDeliver.build(), new ArraySet<>()),
-                                                    new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                                    new ActionCommand(firstSampleDeliver.build(), new ArraySet<>())
+//                                                    new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                             ),
                                             new ActionCommand(firstSampleDeliverIn.build(), new ArraySet<>()),
-                                            new OpenGripplerCommand(transferSubsystem),
+//                                            new OpenGripplerCommand(transferSubsystem),
                                             new WaitCommand(250)
                                     )
 
@@ -258,17 +258,17 @@ public class BasketAutoFourPP extends CommandOpMode {
                             new ParallelCommandGroup(
 
                                     new ActionCommand(secondSample.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+//                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
                                     new SequentialCommandGroup(
-                                            new InstantCommand(intakeSubsystem::intakeSlidesOut), // new IntakeSlidesOutCommand(intakeSubsystem),
-                                            new InstantCommand(intakeSubsystem::intakePivotDown) // new IntakePivotDownCommand(intakeSubsystem, robotState)
+//                                            new InstantCommand(intakeSubsystem::intakeSlidesOut), // new IntakeSlidesOutCommand(intakeSubsystem),
+//                                            new InstantCommand(intakeSubsystem::intakePivotDown) // new IntakePivotDownCommand(intakeSubsystem, robotState)
                                     )
                             ),
                             new SequentialCommandGroup(
 
                                     new ParallelCommandGroup(
                                         new SequentialCommandGroup(
-                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+//                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                         ),
                                         new ActionCommand(secondSampleSlowMoveIn.build(), new ArraySet<>())
                                     )
@@ -276,21 +276,21 @@ public class BasketAutoFourPP extends CommandOpMode {
                             ),
 
 
-                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+//                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
 
 
 
                             new SequentialCommandGroup(
-                                    new CloseGripplerCommand(transferSubsystem),
+//                                    new CloseGripplerCommand(transferSubsystem),
 
                                     // do the drop off if we have the sample
                                     new SequentialCommandGroup(
                                             new ParallelCommandGroup(
-                                                    new ActionCommand(deliverSecondSample.build(), new ArraySet<>()),
-                                                    new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                                    new ActionCommand(deliverSecondSample.build(), new ArraySet<>())
+//                                                    new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                             ),
                                             new ActionCommand(deliverSecondSampleMoveIn.build(), new ArraySet<>()),
-                                            new OpenGripplerCommand(transferSubsystem),
+//                                            new OpenGripplerCommand(transferSubsystem),
                                             new WaitCommand(250)
                                     )
 
@@ -300,39 +300,39 @@ public class BasketAutoFourPP extends CommandOpMode {
 
                             new ParallelCommandGroup(
 
-                                    new ActionCommand(thirdSample.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
+                                    new ActionCommand(thirdSample.build(), new ArraySet<>())
+//                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState)
                             ),
                             //third sample
 
 
                             new ParallelCommandGroup(
                                     new SequentialCommandGroup(
-                                            new IntakeSlidesOutCommand(intakeSubsystem),
-                                            new IntakePivotDownCommand(intakeSubsystem, robotState),
-                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
+//                                            new IntakeSlidesOutCommand(intakeSubsystem),
+//                                            new IntakePivotDownCommand(intakeSubsystem, robotState),
+//                                            new ColourAwareIntakeCommand(intakeSubsystem).withTimeout(2000)
                                     ),
 
                                     new ActionCommand(thirdSampleSlowMoveIn.build(), new ArraySet<>())
 
                             ),
-                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
+//                            new IntakeCommandGroup(intakeSubsystem, transferSubsystem, robotState),
 
                             new SequentialCommandGroup(
                                     new ParallelCommandGroup(
-                                            new ActionCommand(deliverThirdSample.build(), new ArraySet<>()),
-                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
+                                            new ActionCommand(deliverThirdSample.build(), new ArraySet<>())
+//                                            new DeliveryCommandGroup(intakeSubsystem, transferSubsystem, slidesSubsystem, robotState )
                                     ),
                                     new ActionCommand(deliverThirdSampleMoveIn.build(), new ArraySet<>()),
-                                    new OpenGripplerCommand(transferSubsystem),
+//                                    new OpenGripplerCommand(transferSubsystem),
                                     new WaitCommand(250)
                             ),
-                            new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+//                            new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
 
                             new ParallelCommandGroup(
-                                    new ActionCommand(park.build(), new ArraySet<>()),
-                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
-                                    new AscentOpenHooksCommand(ascentSubsystem)
+                                    new ActionCommand(park.build(), new ArraySet<>())
+//                                    new DeliveryResetCommandGroup(intakeSubsystem,transferSubsystem,slidesSubsystem, robotState),
+//                                    new AscentOpenHooksCommand(ascentSubsystem)
                             ),
 
                             new InstantCommand(()->{
@@ -344,7 +344,7 @@ public class BasketAutoFourPP extends CommandOpMode {
 
 
                     )
-                )
+
         );
 
     }
