@@ -63,7 +63,7 @@ public class PinpointDrive extends MecanumDrive {
 
     public PinpointDrive(HardwareMap hardwareMap, Pose2d pose) {
         super(hardwareMap, pose);
-        pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"pinpoint");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriverRR.class,"odo");
 
         // RR localizer note: don't love this conversion (change driver?)
         pinpoint.setOffsets(DistanceUnit.MM.fromInches(PARAMS.xOffset), DistanceUnit.MM.fromInches(PARAMS.yOffset));
@@ -81,7 +81,7 @@ public class PinpointDrive extends MecanumDrive {
         This is recommended before you run your autonomous, as a bad initial calibration can cause
         an incorrect starting value for x, y, and heading.
          */
-        //pinpoint.recalibrateIMU();
+        //pinpoint.recalbrateIMU();
         pinpoint.resetPosAndIMU();
         // wait for pinpoint to finish calibrating
         try {

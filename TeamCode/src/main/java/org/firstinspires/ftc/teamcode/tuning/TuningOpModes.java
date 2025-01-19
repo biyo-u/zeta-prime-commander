@@ -86,12 +86,12 @@ public final class TuningOpModes {
                         MecanumDrive.PARAMS.maxProfileAccel,
                         hardwareMap.getAll(LynxModule.class),
                         Arrays.asList(
-                                md.frontLeftMotor,
-                                md.backLeftMotor
+                                md.frontLeft,
+                                md.rearLeft
                         ),
                         Arrays.asList(
-                                md.frontRightMotor,
-                                md.backRightMotor
+                                md.frontRight,
+                                md.rearRight
                         ),
                         leftEncs,
                         rightEncs,
